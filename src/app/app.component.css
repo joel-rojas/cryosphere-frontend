@@ -1,0 +1,12 @@
+.bg-gray{
+  background-color: #f1eded;
+}
+.btn-circle{
+  border-radius: 50%;
+}
+.btn-circle i:before{
+  transform: scale(2);
+}
+.container-data{
+  height: calc(100% - 79px);
+}

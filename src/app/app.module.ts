@@ -1,5 +1,6 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
+import {HttpModule} from '@angular/http';
 import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
 
 import { AppComponent } from './app.component';
@@ -14,7 +15,8 @@ import { Ng5SliderModule } from 'ng5-slider';
   imports: [
     BrowserModule,
     Ng5SliderModule,
-    NgbModule
+    NgbModule,
+    HttpModule
   ],
   providers: [],
   bootstrap: [AppComponent]
