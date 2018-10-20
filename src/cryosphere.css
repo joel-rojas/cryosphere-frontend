@@ -1,7 +1,13 @@
 @import url('../node_modules/@mdi/font/css/materialdesignicons.css');
-
-.container-map{
-  width: 100%;
-  height: 100%;
-
+.bg-gray{
+  background-color: #ededed;
+}
+.btn-circle{
+  border-radius: 50%;
+}
+.btn-circle i:before{
+  transform: scale(2);
+}
+.container-data{
+  height: calc(100% - 79px);
 }
