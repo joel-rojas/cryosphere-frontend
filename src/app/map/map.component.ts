@@ -1,5 +1,5 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
-import {} from '@types/googlemaps';
+import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
+import {MapService} from './map.service';
 
 @Component({
   selector: 'app-map',
@@ -7,18 +7,23 @@ import {} from '@types/googlemaps';
   styleUrls: ['./map.component.css']
 })
 export class MapComponent implements OnInit {
-  @ViewChild('gmap') gmapElement: any;
+  @ViewChild('map') gmapElement: ElementRef;
   map: google.maps.Map;
 
-  constructor() { }
+  constructor(private gmapService: MapService) { }
 
   ngOnInit() {
-    const mapProp = {
-      center: new google.maps.LatLng(18.5793, 73.8143),
-      zoom: 15,
-      mapTypeId: google.maps.MapTypeId.ROADMAP
-    };
-    this.map = new google.maps.Map(this.gmapElement.nativeElement, mapProp);
+    this.gmapService.initMap(this.gmapElement.nativeElement, {
+      center: {lat: 18.5793, lng: 73.8143},
+      scrollwheel: true,
+      zoom: 8
+    });
+    // const mapProp = {
+    //   center: new google.maps.LatLng(18.5793, 73.8143),
+    //   zoom: 15,
+    //   mapTypeId: google.maps.MapTypeId.ROADMAP
+    // };
+    // this.map = new google.maps.Map(this.gmapElement.nativeElement, mapProp);
   }
 
 }
