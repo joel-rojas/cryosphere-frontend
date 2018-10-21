@@ -60,6 +60,17 @@ export class MapService {
     });
   }
 
+  getCurrentDateStringFormat() {
+    const currentDate = new Date();
+    currentDate.setHours(0);
+    currentDate.setMinutes(0);
+    currentDate.setSeconds(0);
+    currentDate.setMilliseconds(0);
+    const monthVal = currentDate.getMonth() + 1;
+    const monthText = monthVal < 10 ? `0${monthVal}` : monthVal;
+    return currentDate.getFullYear() + '-' + monthText + '-' + '07';
+  }
+
   getMapSubject(): Observable<any> {
     return this.mapSubject.asObservable();
   }
@@ -100,20 +111,13 @@ export class MapService {
     const mapBBoxNE = mapBBox.getNorthEast();
     const mapBBoxSW = mapBBox.getSouthWest();
     const mapBBCoor = [[mapBBoxSW.lat(), mapBBoxSW.lng()], [mapBBoxNE.lat(), mapBBoxNE.lng()]];
-    const currentDate = new Date();
-    currentDate.setHours(0);
-    currentDate.setMinutes(0);
-    currentDate.setSeconds(0);
-    currentDate.setMilliseconds(0);
-    const monthVal = currentDate.getMonth() + 1;
-    const monthText = monthVal < 10 ? `0${monthVal}` : monthVal;
-    const dateStr = currentDate.getFullYear() + '-' + monthText + '-' + currentDate.getDate();
-    this.setImageLayer('SMAP_L4_Frozen_Area', dateStr);
-    this.saveDataLayerForAPI().then(data => {
-      this.webService.sendCryosphereData(userCoor, mapBBCoor, data).toPromise().then(() => {
-        console.log('Saved Succesfully');
+    this.setImageLayer('SMAP_L4_Frozen_Area');
+    // this.saveDataLayerForAPI().then(data => {
+      this.webService.sendCryosphereData(userCoor, mapBBCoor).toPromise().then((data) => {
+        console.log(data);
+        console.log('Processed Succesfully');
       });
-    });
+    // });
   }
 
   saveDataLayerForAPI() {
@@ -139,12 +143,12 @@ export class MapService {
     });
   }
 
-  setImageLayer(dataLayer, dateString, isDateRange?): void {
-    dateString = dateString || '2018-10-02';
+  setImageLayer(dataLayer, dateString?, isDateRange?): void {
     const layerInfo = {
       name: dataLayer,
       gMapsLevel: this.layerConf[dataLayer].gMapsLevel
     };
+    dateString = dateString || this.getCurrentDateStringFormat();
     const getTileUrl = this.getTileUrl(layerInfo, dateString);
     const layerOptions = {
       alt: dataLayer,
@@ -163,6 +167,8 @@ export class MapService {
         forEach((val: google.maps.MapType, idx) => {
         if (idx > 0) {
           val.setOpacity(0);
+        } else {
+          val.setOpacity(0.5);
         }
       });
     }
@@ -223,23 +229,26 @@ export class MapService {
     const validDatStr = minDateStr.split('/').join('-');
     const minDate = new Date(`${validDatStr}T00:00:00`);
     const currentDate = new Date();
+    currentDate.setDate(7);
     currentDate.setHours(0);
     currentDate.setMinutes(0);
     currentDate.setSeconds(0);
     currentDate.setMilliseconds(0);
-    this.yearSet = [minDate.getFullYear()];
+    this.yearSet = [];
     while (minDate < currentDate) {
-      const year = minDate.getFullYear() + 1;
+      const year = minDate.getFullYear();
       this.yearSet.push(year);
-      minDate.setFullYear(year);
       if (year === currentDate.getFullYear()) {
         minDate.setDate(currentDate.getDate());
         minDate.setMonth(currentDate.getMonth());
       }
       const monthVal = minDate.getMonth() + 1;
       const monthText = monthVal < 10 ? `0${monthVal}` : monthVal;
-      const dateStr = minDate.getFullYear() + '-' + monthText + '-' + minDate.getDate();
+      const dateVal = minDate.getDate();
+      const dateTxt = dateVal < 10 ? `0${dateVal}` : dateVal;
+      const dateStr = minDate.getFullYear() + '-' + monthText + '-' + dateTxt;
       this.setImageLayer(layerName, dateStr, true);
+      minDate.setFullYear(year + 1);
     }
   }
 

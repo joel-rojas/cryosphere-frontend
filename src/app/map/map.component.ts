@@ -18,14 +18,15 @@ export class MapComponent implements OnInit {
 
   ngOnInit() {
     this.mapProm = this.gmapService.initMap(this.gmapElement.nativeElement, {
-      center: {lat: 18.5793, lng: 73.8143},
+      center: {lat: -16.5214, lng: -67.253},
       scrollwheel: true,
-      zoom: 3,
+      zoom: 5,
       maxZoom: 10
     });
     this.mapProm.then(() => {
       this.map = this.gmapService.getMap();
       this.gmapService.setMapClickEv();
+      this.gmapService.setImageLayer(this.dataLayerSelected);
     });
   }
 

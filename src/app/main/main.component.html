@@ -11,10 +11,11 @@
                 <div [hidden]="hideFilterByYearData">
                   <div class="mb-2">
                     <label>Years</label>
-                    <ng5-slider [(value)]="value" [options]="options"></ng5-slider>
+                    <ng5-slider [(value)]="value" [options]="options" (userChange)="onSliderChange($event)"></ng5-slider>
                   </div>
-                  <!-- <ngx-charts-area-chart-stacked
+                  <ngx-charts-area-chart-stacked
                     width="100%"
+                    [hidden]="multi.length === 0"
                     [view]="view"
                     [scheme]="colorScheme"
                     [results]="multi"
@@ -27,7 +28,7 @@
                     [xAxisLabel]="xAxisLabel"
                     [yAxisLabel]="yAxisLabel"
                     (select)="onSelect($event)">
-                  </ngx-charts-area-chart-stacked> -->
+                  </ngx-charts-area-chart-stacked>
                 </div>
               </div>
             </ng-template>

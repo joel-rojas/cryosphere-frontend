@@ -1,10 +1,11 @@
 import { Component, OnInit, EventEmitter } from '@angular/core';
-import { Options, LabelType, CustomStepDefinition } from 'ng5-slider';
+import { Options, LabelType, CustomStepDefinition, ChangeContext } from 'ng5-slider';
+import {map} from 'rxjs/operators';
 import { BrowserModule } from '@angular/platform-browser';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
 import { WebService } from './../services/web.service';
 import { MapService } from './../map/map.service';
-import { single, multi } from '../data';
+// import { single, multi } from '../data';
 
 @Component({
   selector: 'app-main',
@@ -26,7 +27,7 @@ export class MainComponent implements OnInit {
   optionTimer;
   images = [1, 2, 3].map(() => `https://gibs.earthdata.nasa.gov/wmts/epsg4326/best/MODIS_Terra_CorrectedReflectance_TrueColor/default/2012-07-09/250m/6/13/${Math.floor((Math.random()*40)+1)}.jpg`);
   single: any[];
-  multi: any[];
+  multi: any[] = [];
 
   view: any[] = [470, 400];
 
@@ -34,21 +35,21 @@ export class MainComponent implements OnInit {
   showXAxis = true;
   showYAxis = true;
   gradient = false;
-  showLegend = true;
+  showLegend = false;
   showXAxisLabel = true;
-  xAxisLabel = 'Country';
+  xAxisLabel = 'Time';
   showYAxisLabel = true;
-  yAxisLabel = 'Population';
+  yAxisLabel = 'Area Percentage';
 
   colorScheme = {
-    domain: ['#5AA454', '#A10A28', '#C7B42C', '#AAAAAA']
+    domain: ['#8F73F1', '#D56F59', '#A5D4FF']
   };
 
   // line, area
   autoScale = true;
 
   constructor(private mapService: MapService, private webService: WebService) {
-    Object.assign(this, {single, multi});
+    // Object.assign(this, {multi});
   }
 
   onSelect(event) {
@@ -57,25 +58,41 @@ export class MainComponent implements OnInit {
   ngOnInit() {}
 
   onSetFilterByYear() {
-    this.mapService.getMapSubject().subscribe((map) => {
-      if (map) {
+    this.mapService.getMapSubject().subscribe((mapObj) => {
+      if (mapObj) {
+        this.mapService.getMapOverlay().clear();
         this.mapService.setImageLayerDataByYears();
         this.setSliderValuesByYear();
-        this.saveLayersForAPI().then((data) => {
-          if (data) {
-            this.sendCryosphereDataByYear(data);
-          }
-        });
+        // this.saveLayersForAPI().then((data) => {
+          // if (data) {
+        this.sendCryosphereDataByYear();
+          // }
+        // });
         this.hideFilterByYearData = false;
+      }
+    });
+  }
+  onSliderChange(changeContext: ChangeContext): void {
+    const overlays = this.mapService.getMapOverlay().getArray();
+    overlays.forEach((val, idx) => {
+      if (this.years.indexOf(changeContext.value) === idx) {
+        val.setOpacity(0.5);
+      } else {
+        val.setOpacity(0);
       }
     });
   }
   saveLayersForAPI() {
     return this.mapService.saveDataLayerForAPI();
   }
-  sendCryosphereDataByYear(data) {
-    this.webService.sendCryosphereDataByYear(data).toPromise().then(() => {
-      console.log('Saved successfully');
+  sendCryosphereDataByYear() {
+    this.webService.sendCryosphereDataByYear().toPromise().then((response) => {
+      console.log('Processed successfully');
+      console.log(response);
+      const data = JSON.parse(response._body).data;
+      console.log(data);
+      this.multi = data;
+      // console.log(data);
     });
   }
   setSliderValuesByYear() {
