@@ -1,0 +1,55 @@
+<div class="container-fluid container-data bg-gray">
+  <div class="row h-100">
+    <div class="col-md-6 p-3 h-100">
+      <div class="card p-5">
+        <h5>Rainfall level per year <br/><small>http://www.senamhi.gob.bo/sismet</small></h5>
+        <ngx-charts-bubble-chart
+        [view]="[600, 450]"
+        [results]="hampaturi"
+        [showGridLines]="true"
+        [legend]="false"
+        >
+        </ngx-charts-bubble-chart>
+      </div>
+    </div>
+    <div class="col-md-6 p-3 h-100">
+      <div class="card p-5">
+        <h5>Percentage of ice per area <br/><small>http://www.senamhi.gob.bo/sismet</small></h5>
+        <ngx-charts-area-chart-stacked
+          [view]="[600, 450]"
+          [scheme]="colorScheme"
+          [results]="multi"
+          [gradient]="gradient"
+          [xAxis]="showXAxis"
+          [yAxis]="showYAxis"
+          [legend]="showLegend"
+          [showXAxisLabel]="showXAxisLabel"
+          [showYAxisLabel]="showYAxisLabel"
+          [xAxisLabel]="'Year'"
+          [yAxisLabel]="'Ammount'">
+        </ngx-charts-area-chart-stacked>
+      </div>
+    </div>
+  </div>
+  <!-- <div class="row h-50">
+    <div class="col-md-12 p-3">
+      <div class="card">
+        <ngx-charts-area-chart-stacked
+          width="100%"
+          [view]="view"
+          [scheme]="colorScheme"
+          [results]="multi"
+          [gradient]="gradient"
+          [xAxis]="showXAxis"
+          [yAxis]="showYAxis"
+          [legend]="showLegend"
+          [showXAxisLabel]="showXAxisLabel"
+          [showYAxisLabel]="showYAxisLabel"
+          [xAxisLabel]="xAxisLabel"
+          [yAxisLabel]="yAxisLabel"
+        >
+        </ngx-charts-area-chart-stacked>
+      </div>
+    </div>
+  </div> -->
+</div>
