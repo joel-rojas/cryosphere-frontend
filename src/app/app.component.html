@@ -1,92 +1,11 @@
 <nav class="navbar navbar-expand-lg bg-white px-2 py-1">
   <div class="w-100 d-flex justify-content-between">
-    <a class="navbar-brand" href="#"><img src="assets/logo.png" class="img-fluid" alt=""><span><strong>Find</strong> my<br/>cryosphere</span></a>
+    <a routerLink="/main" class="navbar-brand"><img src="assets/logo.png" class="img-fluid" alt=""><span><strong>Find</strong> my<br/>cryosphere</span></a>
+    <a routerLink="/dashboard">Dashboard</a>
     <form class="form-inline w-50 justify-content-end">
       <input class="w-75 form-control mr-sm-2" type="search" placeholder="Search location..." aria-label="Search">
       <button class="btn btn-primary btn-circle" type="submit"><i class="mdi mdi-magnify"></i></button>
     </form>
   </div>
 </nav>
-
-<div class="container-data">
-  <div class="row no-gutters h-100">
-    <div class="col-md-4 bg-gray tabset-fixed">
-
-      <ngb-tabset>
-        <ngb-tab title="Data">
-          <ng-template ngbTabContent>
-            <div class="card">
-              <ngx-charts-area-chart-stacked
-                width="100%"
-                [view]="view"
-                [scheme]="colorScheme"
-                [results]="multi"
-                [gradient]="gradient"
-                [xAxis]="showXAxis"
-                [yAxis]="showYAxis"
-                [legend]="showLegend"
-                [showXAxisLabel]="showXAxisLabel"
-                [showYAxisLabel]="showYAxisLabel"
-                [xAxisLabel]="xAxisLabel"
-                [yAxisLabel]="yAxisLabel"
-                (select)="onSelect($event)">
-              </ngx-charts-area-chart-stacked>
-            </div>
-          </ng-template>
-        </ngb-tab>
-        <ngb-tab title="Filters">
-          <ng-template ngbTabContent>
-            <ngb-accordion class="h-50" #acc="ngbAccordion" activeIds="ngb-panel-0">
-              <ngb-panel>
-                <ng-template ngbPanelTitle>
-                  <span>La Paz</span><span class="plus-minus"></span>
-                </ng-template>
-                <ng-template ngbPanelContent>
-                  <div class="mb-2">
-                    <label>Years</label>
-                    <ng5-slider [(value)]="value" [options]="options"></ng5-slider>
-                  </div>
-                  <div class="mb-2">
-                    <label>Years</label>
-                    <ng5-slider [(value)]="value" [options]="options"></ng5-slider>
-                  </div>
-                </ng-template>
-              </ngb-panel>
-              <ngb-panel>
-                <ng-template ngbPanelTitle>
-                  <span>Bolivia</span><span class="plus-minus"></span>
-                </ng-template>
-                <ng-template ngbPanelContent>
-
-
-
-                </ng-template>
-              </ngb-panel>
-            </ngb-accordion>
-          </ng-template>
-        </ngb-tab>
-        <ngb-tab title="Images">
-          <ng-template ngbTabContent>
-            <div class="card">
-              <ngb-carousel *ngIf="images">
-                <ng-template ngbSlide>
-                  <img [src]="images[0]" alt="Random first slide">
-                </ng-template>
-                <ng-template ngbSlide>
-                  <img [src]="images[1]" alt="Random second slide">
-                </ng-template>
-                <ng-template ngbSlide>
-                  <img [src]="images[2]" alt="Random third slide">
-                </ng-template>
-              </ngb-carousel>
-            </div>
-          </ng-template>
-        </ngb-tab>
-      </ngb-tabset>
-
-    </div>
-    <div class="col-md-8 h-100">
-      <app-map></app-map>
-    </div>
-  </div>
-</div>
+<router-outlet></router-outlet>

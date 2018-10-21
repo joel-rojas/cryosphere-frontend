@@ -1,8 +1,7 @@
-import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, Input, AfterViewInit, OnChanges, SimpleChanges } from '@angular/core';
 import {Observable, of, pipe} from 'rxjs';
 import {map, catchError} from 'rxjs/operators';
 import {MapService} from './map.service';
-//const hampaturiData = require('../../assets/geodata/hampaturi.json');
 
 @Component({
   selector: 'app-map',
@@ -10,6 +9,7 @@ import {MapService} from './map.service';
   styleUrls: ['./map.component.css']
 })
 export class MapComponent implements OnInit {
+  @Input() dataLayerSelected;
   @ViewChild('map') gmapElement: ElementRef;
   map: google.maps.Map;
   mapProm: Promise<any>;
@@ -24,14 +24,17 @@ export class MapComponent implements OnInit {
     });
     this.mapProm.then(() => {
       this.map = this.gmapService.getMap();
-      this.gmapService.setImageLayer();
-    //  console.log(hampaturiData);
-      // this.gmapService.setGeoJSONData(hampaturiData);
-      // this.gmapService.getData().pipe(map((res) => res._body),
-      //   catchError(error => Observable.of(null))).subscribe(data => {
-      //   console.log(data);
-      // });
+      this.gmapService.setImageLayer(this.dataLayerSelected);
     });
+  }
+  ngOnChanges(changes: SimpleChanges) {
+    if (this.map) {
+      this.gmapService.setImageLayer(this.dataLayerSelected);
+    }
+  }
+
+  ngAfterViewInit() {
+    console.log(this.dataLayerSelected);
   }
 
 }

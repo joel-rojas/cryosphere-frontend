@@ -2,8 +2,6 @@ import { Injectable } from '@angular/core';
 import { Http } from '@angular/http';
 import { Observable, of } from 'rxjs';
 
-let map;
-
 const getScriptSrc = (callbackName) => {
   return `https://maps.googleapis.com/maps/api/js?key=AIzaSyDx92iaKUnowpTZOLt1FGAJqi98picikH8&callback=${callbackName}`;
 };
@@ -15,6 +13,17 @@ export class MapService {
   private map: google.maps.Map;
   private geocoder: google.maps.Geocoder;
   private scriptLoadingPromise: Promise<any>;
+  private layerConf = {
+    'SMAP_L4_Snow_Mass': {
+      gMapsLevel: 'GoogleMapsCompatible_Level6'
+    },
+    'MODIS_Terra_NDSI_Snow_Cover': {
+      gMapsLevel: 'GoogleMapsCompatible_Level8'
+    },
+    'SMAP_L4_Frozen_Area': {
+      gMapsLevel: 'GoogleMapsCompatible_Level6'
+    }
+  };
 
   constructor(private http: Http) {
     this.loadScriptLoadingPromise();
@@ -30,7 +39,6 @@ export class MapService {
   initMap(mapHtmlElement: HTMLElement, options: google.maps.MapOptions): Promise<google.maps.Map> {
     return this.onReady().then(() => {
       this.map = new google.maps.Map(mapHtmlElement, options);
-      map = this.map;
       return this.map;
     });
   }
@@ -39,27 +47,33 @@ export class MapService {
     return this.map;
   }
 
-  getTileUrl(type, date): (tileCord: google.maps.Point, zoom: Number) => string {
+  getTileUrl(layerConf, date): (tileCord: google.maps.Point, zoom: Number) => string {
+    const type = layerConf.name;
+    const gMapsLevel = layerConf.gMapsLevel;
     return (tile, zoom) => {
       return `//gibs.earthdata.nasa.gov/wmts/epsg3857/best/${type}/default/${date}` +
-        `/GoogleMapsCompatible_Level8/${zoom}/${tile.y}/${tile.x}.png`;
+        `/${gMapsLevel}/${zoom}/${tile.y}/${tile.x}.png`;
     };
   }
 
-  setImageLayer(): void {
-    const typeMap = 'MODIS_Terra_NDSI_Snow_Cover';
-    const getTileUrl = this.getTileUrl(typeMap, '2015-04-13');
+  setImageLayer(dataLayer): void {
+    const layerInfo = {
+      name: dataLayer,
+      gMapsLevel: this.layerConf[dataLayer].gMapsLevel
+    };
+    const getTileUrl = this.getTileUrl(layerInfo, '2015-04-13');
     const layerOptions = {
-      alt: typeMap,
+      alt: dataLayer,
       getTileUrl: getTileUrl,
-      maxZoom: 12,
+      maxZoom: 10,
       minZoom: 1,
-      name: typeMap,
+      name: dataLayer,
       tileSize: new google.maps.Size(256, 256),
       opacity: 0.5
     };
     const imageMapType = new google.maps.ImageMapType(layerOptions);
-    this.map.overlayMapTypes.insertAt(0, imageMapType);
+    this.map.overlayMapTypes.clear();
+    this.map.overlayMapTypes.push(imageMapType);
   }
 
   setGeoJSONData(geoData): void {

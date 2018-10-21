@@ -1,0 +1,106 @@
+<div class="container-data">
+  <div class="row no-gutters h-100">
+    <div class="col-md-4 bg-gray tabset-fixed">
+
+      <ngb-tabset>
+        <ngb-tab title="Data">
+            <ng-template ngbTabContent>
+              <div class="card">
+                <ngx-charts-area-chart-stacked
+                  width="100%"
+                  [view]="view"
+                  [scheme]="colorScheme"
+                  [results]="multi"
+                  [gradient]="gradient"
+                  [xAxis]="showXAxis"
+                  [yAxis]="showYAxis"
+                  [legend]="showLegend"
+                  [showXAxisLabel]="showXAxisLabel"
+                  [showYAxisLabel]="showYAxisLabel"
+                  [xAxisLabel]="xAxisLabel"
+                  [yAxisLabel]="yAxisLabel"
+                  (select)="onSelect($event)">
+                </ngx-charts-area-chart-stacked>
+              </div>
+            </ng-template>
+          </ngb-tab>
+        <ngb-tab title="Filters">
+          <ng-template ngbTabContent>
+            <ngb-accordion class="h-50" #acc="ngbAccordion" activeIds="ngb-panel-0">
+              <ngb-panel>
+                <ng-template ngbPanelTitle>
+                  <span>La Paz</span><span class="plus-minus"></span>
+                </ng-template>
+                <ng-template ngbPanelContent>
+                  <div class="mb-2">
+                    <label>Years</label>
+                    <ng5-slider [(value)]="value" [options]="options"></ng5-slider>
+                  </div>
+                  <div class="mb-2">
+                    <label>Years</label>
+                    <ng5-slider [(value)]="value" [options]="options"></ng5-slider>
+                  </div>
+                </ng-template>
+              </ngb-panel>
+              <ngb-panel>
+                <ng-template ngbPanelTitle>
+                  <span>Bolivia</span><span class="plus-minus"></span>
+                </ng-template>
+                <ng-template ngbPanelContent>
+
+
+
+                </ng-template>
+              </ngb-panel>
+            </ngb-accordion>
+          </ng-template>
+        </ngb-tab>
+        <ngb-tab title="Images">
+          <ng-template ngbTabContent>
+            <div class="card">
+              <ngb-carousel *ngIf="images">
+                <ng-template ngbSlide>
+                  <img [src]="images[0]" alt="Random first slide">
+                </ng-template>
+                <ng-template ngbSlide>
+                  <img [src]="images[1]" alt="Random second slide">
+                </ng-template>
+                <ng-template ngbSlide>
+                  <img [src]="images[2]" alt="Random third slide">
+                </ng-template>
+              </ngb-carousel>
+            </div>
+          </ng-template>
+        </ngb-tab>
+        <ngb-tab title="Layers">
+          <ng-template ngbTabContent>
+            <ngb-accordion class="h-50" #acc="ngbAccordion" activeIds="ngb-panel-0">
+              <ngb-panel>
+                <ng-template ngbPanelTitle>
+                  <span>Select layers</span><span class="plus-minus"></span>
+                </ng-template>
+                <ng-template ngbPanelContent>
+                  <div class="btn-group btn-group-toggle" ngbRadioGroup name="radioBasic" [(ngModel)]="dataLayerSelected">
+                    <label ngbButtonLabel class="btn-primary">
+                      <input ngbButton type="radio" value="SMAP_L4_Snow_Mass"> Snow Mass
+                    </label>
+                    <label ngbButtonLabel class="btn-primary">
+                      <input ngbButton type="radio" value="MODIS_Terra_NDSI_Snow_Cover"> Snow Cover
+                    </label>
+                    <label ngbButtonLabel class="btn-primary">
+                      <input ngbButton type="radio" value="SMAP_L4_Frozen_Area"> Frozen Area
+                    </label>
+                  </div>
+                </ng-template>
+              </ngb-panel>
+            </ngb-accordion>
+          </ng-template>
+        </ngb-tab>
+      </ngb-tabset>
+
+    </div>
+    <div class="col-md-8 h-100">
+      <app-map [dataLayerSelected]="dataLayerSelected"></app-map>
+    </div>
+  </div>
+</div>
