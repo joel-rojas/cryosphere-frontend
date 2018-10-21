@@ -97,6 +97,8 @@ export class MapService {
     };
     this.clearGeoCodingMarkers();
     this.clearShortestPolylines();
+    this.getMapOverlay().clear();
+    this.setImageLayer('SMAP_L4_Frozen_Area');
     const latLng = new google.maps.LatLng(userCoor[0], userCoor[1]);
     this.geoCodingMarkers.push(new google.maps.Marker({
       position: latLng,
