@@ -36,9 +36,9 @@
         <ngb-tab title="Filters">
           <ng-template ngbTabContent>
             <div class="card p-3">
-              <div class="btn-group btn-group-toggle" ngbRadioGroup [(ngModel)]="countrySelected">
+              <div class="btn-group btn-group-toggle" ngbRadioGroup [(ngModel)]="countrySelected" (ngModelChange)="onChangeCountry($event)">
                   <label ngbButtonLabel class="btn btn-sm btn-success">
-                    <input ngbButton type="radio" [value]="argentina"> Argentina
+                    <input ngbButton type="radio" value="argentina"> Argentina
                   </label>
                   <label ngbButtonLabel class="btn btn-sm btn-warning">
                     <input ngbButton type="radio" value="canada"> Canada

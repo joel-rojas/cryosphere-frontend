@@ -8,8 +8,6 @@ const getScriptSrc = (callbackName) => {
   return `https://maps.googleapis.com/maps/api/js?key=AIzaSyDx92iaKUnowpTZOLt1FGAJqi98picikH8&libraries=places&callback=${callbackName}`;
 };
 
-window.mapT = null;
-
 @Injectable({
   providedIn: 'root'
 })
@@ -78,7 +76,6 @@ export class MapService {
     return this.onReady().then(() => {
       this.map = new google.maps.Map(mapHtmlElement, options);
       this.mapSubject.next(this.map);
-      window.mapT = this.map;
       return this.map;
     });
   }
@@ -263,7 +260,7 @@ export class MapService {
 
       });
       this.map.fitBounds(bounds);
-      this.sendNearestCryosphereData();
+      // this.sendNearestCryosphereData();
     });
   }
 

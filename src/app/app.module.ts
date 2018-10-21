@@ -28,7 +28,6 @@ import { AppComponent } from './app.component';
     Ng5SliderModule,
     BrowserAnimationsModule,
     NoopAnimationsModule,
-    FormsModule,
     NgbModule,
     NgxChartsModule,
     HttpModule,

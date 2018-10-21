@@ -1,8 +1,5 @@
 import { Component, OnInit, EventEmitter, OnChanges, SimpleChanges } from '@angular/core';
 import { Options, LabelType, CustomStepDefinition, ChangeContext } from 'ng5-slider';
-import {map} from 'rxjs/operators';
-import { BrowserModule } from '@angular/platform-browser';
-import { NgxChartsModule } from '@swimlane/ngx-charts';
 import { WebService } from './../services/web.service';
 import { MapService } from './../map/map.service';
 // import { single, multi } from '../data';
@@ -13,7 +10,7 @@ import { MapService } from './../map/map.service';
   styleUrls: ['./main.component.css']
 })
 export class MainComponent implements OnInit, OnChanges {
-  countrySelected: 'argentina';
+  countrySelected = '';
   dataLayerSelected = 'SMAP_L4_Frozen_Area';
   hideFilterByYearData = true;
   layersByYear = [];
@@ -56,7 +53,8 @@ export class MainComponent implements OnInit, OnChanges {
   }
   ngOnInit() {}
 
-  ngOnChanges(changes: SimpleChanges) {
+  ngOnChanges(changes: SimpleChanges) {}
+  onChangeCountry($event) {
     this.mapService.getNearestCryosphreByUserLocation(this.countrySelected);
   }
 
@@ -91,11 +89,8 @@ export class MainComponent implements OnInit, OnChanges {
   sendCryosphereDataByYear() {
     this.webService.sendCryosphereDataByYear().toPromise().then((response) => {
       console.log('Processed successfully');
-      console.log(response);
       const data = JSON.parse(response['_body']).data;
-      console.log(data);
       this.multi = data;
-      // console.log(data);
     });
   }
   setSliderValuesByYear() {
