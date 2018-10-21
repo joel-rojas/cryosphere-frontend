@@ -12,6 +12,7 @@ import { MapService } from './../map/map.service';
 export class MainComponent implements OnInit, OnChanges {
   countrySelected = '';
   dataLayerSelected = 'SMAP_L4_Frozen_Area';
+  distanceInMeters = null;
   hideFilterByYearData = true;
   layersByYear = [];
   title = 'cryosphere-frontend';
@@ -55,7 +56,9 @@ export class MainComponent implements OnInit, OnChanges {
 
   ngOnChanges(changes: SimpleChanges) {}
   onChangeCountry($event) {
-    this.mapService.getNearestCryosphreByUserLocation(this.countrySelected);
+    this.mapService.getNearestCryosphreByUserLocation($event).then((data) => {
+      this.distanceInMeters = data;
+    });
   }
 
   onSetFilterByYear() {

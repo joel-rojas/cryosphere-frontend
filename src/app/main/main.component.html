@@ -82,9 +82,9 @@
 
     </div>
     <div class="col-md-8 h-100">
-      <div class="btn-group btn-group-toggle fixed-layers" ngbRadioGroup [(ngModel)]="countrySelected">
+      <div class="btn-group btn-group-toggle fixed-layers" ngbRadioGroup [(ngModel)]="countrySelected" (ngModelChange)="onChangeCountry($event)">
           <label ngbButtonLabel class="btn btn-sm btn-success">
-            <input ngbButton type="radio" [value]="argentina"> Argentina
+            <input ngbButton type="radio" value="argentina"> Argentina
           </label>
           <label ngbButtonLabel class="btn btn-sm btn-warning">
             <input ngbButton type="radio" value="canada"> Canada
@@ -93,16 +93,17 @@
             <input ngbButton type="radio" value="rusia"> Rusia
           </label>
       </div>
-      <div class="btn-group btn-group-toggle fixed-layers-top" ngbRadioGroup name="radioBasic" [(ngModel)]="dataLayerSelected">
+      <div class="btn-group btn-group-toggle fixed-layers-top" style="background: #DDDDDD;">
         <!-- <label ngbButtonLabel class="btn btn-sm btn-primary">
           <input ngbButton type="radio" value="SMAP_L4_Snow_Mass"> Snow Mass
         </label>
         <label ngbButtonLabel class="btn btn-sm btn-primary">
           <input ngbButton type="radio" value="MODIS_Terra_NDSI_Snow_Cover"> Snow Cover
         </label> -->
-        <label ngbButtonLabel class="btn btn-sm btn-primary">
+        <h5 [hidden]="distanceInMeters == null">Minimum distance in meters between user and frozen area: {{distanceInMeters}}</h5>
+        <!-- <label ngbButtonLabel class="btn btn-sm btn-primary">
           <input ngbButton type="radio" value="SMAP_L4_Frozen_Area"> Frozen Area
-        </label>
+        </label> -->
       </div>
       <app-map [dataLayerSelected]="dataLayerSelected"></app-map>
     </div>

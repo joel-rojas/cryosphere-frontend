@@ -95,8 +95,10 @@ export class MapService {
       map: this.map
     }));
     this.map.setCenter(latLng);
-    this.webService.sendCryosphereData(data).toPromise().then(response => {
+    return this.webService.sendCryosphereData(data).toPromise().then(response => {
       console.log(response);
+      const point = response['_body'].data;
+      return this.getDistanceTwoPoints(userCoor, point);
     });
   }
 
@@ -142,6 +144,21 @@ export class MapService {
 
   getYearSet() {
     return this.yearSet;
+  }
+
+  private radians(x) {
+    return x * Math.PI / 180;
+  }
+
+  getDistanceTwoPoints(p1, p2) {
+    const R = 6378137; // Earth’s mean radius in meter
+    const dLat = this.radians(p2[0] - p1[0]);
+    const dLong = this.radians(p2[1] - p1[1]);
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(this.radians(p1.lat())) * Math.cos(this.radians(p2.lat())) *
+      Math.sin(dLong / 2) * Math.sin(dLong / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return (R * c).toFixed(2);
   }
 
   sendNearestCryosphereData() {

@@ -8,13 +8,13 @@ import { MapService } from './map/map.service';
 })
 
 export class AppComponent implements OnInit {
-  @ViewChild('searchEl') searchRef;
+  // @ViewChild('searchEl') searchRef;
   constructor(private mapService: MapService) {}
   ngOnInit() {
     this.mapService.getMapSubject().subscribe((map) => {
-      if (map) {
-        this.mapService.setGeocodingUIConf(this.searchRef.nativeElement);
-      }
+      // if (map) {
+      //   this.mapService.setGeocodingUIConf(this.searchRef.nativeElement);
+      // }
     });
   }
 }
