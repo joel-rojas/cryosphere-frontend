@@ -11030,7 +11030,11 @@ select.form-control[multiple] {
 .container-data{
   height: calc(100% - 79px);
 }
-
+.fixed-layers{
+  position: absolute;
+  top: 20px;
+  right: 20px;   
+}
 
 .plus-minus {
   position: relative;

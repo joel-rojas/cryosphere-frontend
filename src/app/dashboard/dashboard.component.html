@@ -1,3 +1,63 @@
-<p>
-  dashboard works!
-</p>
+<div class="container-fluid container-data">
+  <div class="row h-50">
+    <div class="col-md-6 p-3">
+      <div class="card">
+        <ngx-charts-area-chart-stacked
+          width="100%"
+          [view]="view"
+          [scheme]="colorScheme"
+          [results]="multi"
+          [gradient]="gradient"
+          [xAxis]="showXAxis"
+          [yAxis]="showYAxis"
+          [legend]="showLegend"
+          [showXAxisLabel]="showXAxisLabel"
+          [showYAxisLabel]="showYAxisLabel"
+          [xAxisLabel]="xAxisLabel"
+          [yAxisLabel]="yAxisLabel"
+          (select)="onSelect($event)">
+        </ngx-charts-area-chart-stacked>
+      </div>
+    </div>
+    <div class="col-md-6 p-3">
+      <div class="card">
+        <ngx-charts-area-chart-stacked
+          width="100%"
+          [view]="view"
+          [scheme]="colorScheme"
+          [results]="multi"
+          [gradient]="gradient"
+          [xAxis]="showXAxis"
+          [yAxis]="showYAxis"
+          [legend]="showLegend"
+          [showXAxisLabel]="showXAxisLabel"
+          [showYAxisLabel]="showYAxisLabel"
+          [xAxisLabel]="xAxisLabel"
+          [yAxisLabel]="yAxisLabel"
+          (select)="onSelect($event)">
+        </ngx-charts-area-chart-stacked>
+      </div>
+    </div>
+  </div>
+  <div class="row h-50">
+    <div class="col-md-12 p-3">
+      <div class="card">
+        <ngx-charts-area-chart-stacked
+          width="100%"
+          [view]="view"
+          [scheme]="colorScheme"
+          [results]="multi"
+          [gradient]="gradient"
+          [xAxis]="showXAxis"
+          [yAxis]="showYAxis"
+          [legend]="showLegend"
+          [showXAxisLabel]="showXAxisLabel"
+          [showYAxisLabel]="showYAxisLabel"
+          [xAxisLabel]="xAxisLabel"
+          [yAxisLabel]="yAxisLabel"
+          (select)="onSelect($event)">
+        </ngx-charts-area-chart-stacked>
+      </div>
+    </div>
+  </div>
+</div>

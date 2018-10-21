@@ -81,6 +81,17 @@
 
     </div>
     <div class="col-md-8 h-100">
+      <div class="btn-group btn-group-toggle fixed-layers" ngbRadioGroup name="radioBasic" [(ngModel)]="dataLayerSelected">
+        <label ngbButtonLabel class="btn btn-sm btn-success">
+          <input ngbButton type="radio" value="SMAP_L4_Snow_Mass"> Snow Mass
+        </label>
+        <label ngbButtonLabel class="btn btn-sm btn-warning">
+          <input ngbButton type="radio" value="MODIS_Terra_NDSI_Snow_Cover"> Snow Cover
+        </label>
+        <label ngbButtonLabel class="btn btn-sm btn-primary">
+          <input ngbButton type="radio" value="SMAP_L4_Frozen_Area"> Frozen Area
+        </label>
+      </div>
       <app-map [dataLayerSelected]="dataLayerSelected"></app-map>
     </div>
   </div>
