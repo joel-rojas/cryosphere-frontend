@@ -15,7 +15,7 @@ export var single = [
 
 export var multi = [
   {
-    "name": "Germany",
+    "name": "Water",
     "series": [
       {
         "name": "2010",
@@ -29,7 +29,7 @@ export var multi = [
   },
 
   {
-    "name": "USA",
+    "name": "Land",
     "series": [
       {
         "name": "2010",
@@ -43,7 +43,7 @@ export var multi = [
   },
 
   {
-    "name": "France",
+    "name": "Ice",
     "series": [
       {
         "name": "2010",

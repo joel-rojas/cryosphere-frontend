@@ -1,9 +1,10 @@
 <div class="container-fluid container-data">
   <div class="row h-50">
     <div class="col-md-6 p-3">
-      <div class="card">
+      <div class="card p-3">
+        <h5>Rainfall level per year <br/><small>http://www.senamhi.gob.bo/sismet</small></h5>
         <ngx-charts-bubble-chart
-        [view]="view"
+        [view]="[600, 230]"
         [results]="hampaturi"
         [showGridLines]="true"
         [legend]="false"
@@ -12,9 +13,10 @@
       </div>
     </div>
     <div class="col-md-6 p-3">
-      <div class="card">
+      <div class="card p-3">
+        <h5>Percentage of water per area</h5>
         <ngx-charts-area-chart-stacked
-          [view]="view"
+          [view]="[600, 230]"
           [scheme]="colorScheme"
           [results]="multi"
           [gradient]="gradient"
@@ -23,8 +25,8 @@
           [legend]="showLegend"
           [showXAxisLabel]="showXAxisLabel"
           [showYAxisLabel]="showYAxisLabel"
-          [xAxisLabel]="xAxisLabel"
-          [yAxisLabel]="yAxisLabel">
+          [xAxisLabel]="'Year'"
+          [yAxisLabel]="'Ammount'">
         </ngx-charts-area-chart-stacked>
       </div>
     </div>
