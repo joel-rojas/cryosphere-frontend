@@ -153,10 +153,10 @@ export class MapService {
     const mapBBCoor = [[mapBBoxSW.lat(), mapBBoxSW.lng()], [mapBBoxNE.lat(), mapBBoxNE.lng()]];
     this.setImageLayer('SMAP_L4_Frozen_Area');
     // this.saveDataLayerForAPI().then(data => {
-      this.webService.sendCryosphereData(userCoor, mapBBCoor).toPromise().then((data) => {
-        console.log(data);
-        console.log('Processed Succesfully');
-      });
+      // this.webService.sendCryosphereData(userCoor, mapBBCoor).toPromise().then((data) => {
+        // console.log(data);
+        // console.log('Processed Succesfully');
+      // });
     // });
   }
 
