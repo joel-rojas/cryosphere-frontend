@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { MapService } from './map/map.service';
 
 @Component({
   selector: 'app-root',
@@ -6,4 +7,14 @@ import { Component } from '@angular/core';
   styleUrls: ['./app.component.css']
 })
 
-export class AppComponent {}
+export class AppComponent implements OnInit {
+  @ViewChild('searchEl') searchRef;
+  constructor(private mapService: MapService) {}
+  ngOnInit() {
+    this.mapService.getMapSubject().subscribe((map) => {
+      if (map) {
+        this.mapService.setGeocodingUIConf(this.searchRef.nativeElement);
+      }
+    });
+  }
+}

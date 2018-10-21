@@ -6,21 +6,29 @@
         <ngb-tab title="Data">
             <ng-template ngbTabContent>
               <div class="card">
-                <ngx-charts-area-chart-stacked
-                  width="100%"
-                  [view]="view"
-                  [scheme]="colorScheme"
-                  [results]="multi"
-                  [gradient]="gradient"
-                  [xAxis]="showXAxis"
-                  [yAxis]="showYAxis"
-                  [legend]="showLegend"
-                  [showXAxisLabel]="showXAxisLabel"
-                  [showYAxisLabel]="showYAxisLabel"
-                  [xAxisLabel]="xAxisLabel"
-                  [yAxisLabel]="yAxisLabel"
-                  (select)="onSelect($event)">
-                </ngx-charts-area-chart-stacked>
+                <label>Filter By Year</label>
+                <button class="btn-primary" (click)="onSetFilterByYear()">Generate</button>
+                <div [hidden]="hideFilterByYearData">
+                  <div class="mb-2">
+                    <label>Years</label>
+                    <ng5-slider [(value)]="value" [options]="options"></ng5-slider>
+                  </div>
+                  <!-- <ngx-charts-area-chart-stacked
+                    width="100%"
+                    [view]="view"
+                    [scheme]="colorScheme"
+                    [results]="multi"
+                    [gradient]="gradient"
+                    [xAxis]="showXAxis"
+                    [yAxis]="showYAxis"
+                    [legend]="showLegend"
+                    [showXAxisLabel]="showXAxisLabel"
+                    [showYAxisLabel]="showYAxisLabel"
+                    [xAxisLabel]="xAxisLabel"
+                    [yAxisLabel]="yAxisLabel"
+                    (select)="onSelect($event)">
+                  </ngx-charts-area-chart-stacked> -->
+                </div>
               </div>
             </ng-template>
           </ngb-tab>
@@ -47,9 +55,6 @@
                   <span>Bolivia</span><span class="plus-minus"></span>
                 </ng-template>
                 <ng-template ngbPanelContent>
-
-
-
                 </ng-template>
               </ngb-panel>
             </ngb-accordion>
@@ -70,30 +75,6 @@
                 </ng-template>
               </ngb-carousel>
             </div>
-          </ng-template>
-        </ngb-tab>
-        <ngb-tab title="Layers">
-          <ng-template ngbTabContent>
-            <ngb-accordion class="h-50" #acc="ngbAccordion" activeIds="ngb-panel-0">
-              <ngb-panel>
-                <ng-template ngbPanelTitle>
-                  <span>Select layers</span><span class="plus-minus"></span>
-                </ng-template>
-                <ng-template ngbPanelContent>
-                  <div class="btn-group btn-group-toggle" ngbRadioGroup name="radioBasic" [(ngModel)]="dataLayerSelected">
-                    <label ngbButtonLabel class="btn-primary">
-                      <input ngbButton type="radio" value="SMAP_L4_Snow_Mass"> Snow Mass
-                    </label>
-                    <label ngbButtonLabel class="btn-primary">
-                      <input ngbButton type="radio" value="MODIS_Terra_NDSI_Snow_Cover"> Snow Cover
-                    </label>
-                    <label ngbButtonLabel class="btn-primary">
-                      <input ngbButton type="radio" value="SMAP_L4_Frozen_Area"> Frozen Area
-                    </label>
-                  </div>
-                </ng-template>
-              </ngb-panel>
-            </ngb-accordion>
           </ng-template>
         </ngb-tab>
       </ngb-tabset>

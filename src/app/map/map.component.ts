@@ -21,20 +21,12 @@ export class MapComponent implements OnInit {
       center: {lat: 18.5793, lng: 73.8143},
       scrollwheel: true,
       zoom: 3,
+      maxZoom: 10
     });
     this.mapProm.then(() => {
       this.map = this.gmapService.getMap();
-      this.gmapService.setImageLayer(this.dataLayerSelected);
+      this.gmapService.setMapClickEv();
     });
-  }
-  ngOnChanges(changes: SimpleChanges) {
-    if (this.map) {
-      this.gmapService.setImageLayer(this.dataLayerSelected);
-    }
-  }
-
-  ngAfterViewInit() {
-    console.log(this.dataLayerSelected);
   }
 
 }
