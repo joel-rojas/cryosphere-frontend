@@ -33,7 +33,7 @@
               </div>
             </ng-template>
           </ngb-tab>
-        <ngb-tab title="Filters">
+        <!-- <ngb-tab title="Filters">
           <ng-template ngbTabContent>
             <div class="card p-3">
               <div class="btn-group btn-group-toggle" ngbRadioGroup [(ngModel)]="countrySelected" (ngModelChange)="onChangeCountry($event)">
@@ -49,7 +49,7 @@
                 </div>
             </div>
           </ng-template>
-        </ngb-tab>
+        </ngb-tab> -->
         <ngb-tab title="Images">
           <ng-template ngbTabContent>
             <div class="card">
@@ -71,13 +71,24 @@
 
     </div>
     <div class="col-md-8 h-100">
-      <div class="btn-group btn-group-toggle fixed-layers" ngbRadioGroup name="radioBasic" [(ngModel)]="dataLayerSelected">
-        <label ngbButtonLabel class="btn btn-sm btn-success">
+      <div class="btn-group btn-group-toggle fixed-layers" ngbRadioGroup [(ngModel)]="countrySelected">
+          <label ngbButtonLabel class="btn btn-sm btn-success">
+            <input ngbButton type="radio" [value]="argentina"> Argentina
+          </label>
+          <label ngbButtonLabel class="btn btn-sm btn-warning">
+            <input ngbButton type="radio" value="canada"> Canada
+          </label>
+          <label ngbButtonLabel class="btn btn-sm btn-primary">
+            <input ngbButton type="radio" value="rusia"> Rusia
+          </label>
+      </div>
+      <div class="btn-group btn-group-toggle fixed-layers-top" ngbRadioGroup name="radioBasic" [(ngModel)]="dataLayerSelected">
+        <!-- <label ngbButtonLabel class="btn btn-sm btn-primary">
           <input ngbButton type="radio" value="SMAP_L4_Snow_Mass"> Snow Mass
         </label>
-        <label ngbButtonLabel class="btn btn-sm btn-warning">
+        <label ngbButtonLabel class="btn btn-sm btn-primary">
           <input ngbButton type="radio" value="MODIS_Terra_NDSI_Snow_Cover"> Snow Cover
-        </label>
+        </label> -->
         <label ngbButtonLabel class="btn btn-sm btn-primary">
           <input ngbButton type="radio" value="SMAP_L4_Frozen_Area"> Frozen Area
         </label>
