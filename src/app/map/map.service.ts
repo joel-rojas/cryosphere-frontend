@@ -5,7 +5,8 @@ import html2canvas from 'html2canvas';
 import { WebService } from './../services/web.service';
 
 const getScriptSrc = (callbackName) => {
-  return `https://maps.googleapis.com/maps/api/js?key=AIzaSyDx92iaKUnowpTZOLt1FGAJqi98picikH8&libraries=places&callback=${callbackName}`;
+  return `https://maps.googleapis.com/maps/api/js?key=AIzaSyDx92iaKUnowpTZOLt1FGAJqi98picikH8` +
+    `&libraries=places,geometry&callback=${callbackName}`;
 };
 
 @Injectable({
@@ -28,6 +29,7 @@ export class MapService {
       minDate: '2015/04/13'
     }
   };
+  private shortestLine;
   private markers = [
     // Canada
     {
@@ -71,6 +73,11 @@ export class MapService {
     });
     this.geoCodingMarkers = [];
   }
+  clearShortestPolylines() {
+    if (this.shortestLine) {
+      this.shortestLine.setMap(null);
+    }
+  }
 
   initMap(mapHtmlElement: HTMLElement, options: google.maps.MapOptions): Promise<google.maps.Map> {
     return this.onReady().then(() => {
@@ -89,6 +96,7 @@ export class MapService {
       image: { imageName: name}
     };
     this.clearGeoCodingMarkers();
+    this.clearShortestPolylines();
     const latLng = new google.maps.LatLng(userCoor[0], userCoor[1]);
     this.geoCodingMarkers.push(new google.maps.Marker({
       position: latLng,
@@ -96,8 +104,8 @@ export class MapService {
     }));
     this.map.setCenter(latLng);
     return this.webService.sendCryosphereData(data).toPromise().then(response => {
-      console.log(response);
-      const point = response['_body'].data;
+      const point = JSON.parse(response['_body']).data;
+      this.drawLineBetweenTwoPoints(userCoor, point);
       return this.getDistanceTwoPoints(userCoor, point);
     });
   }
@@ -155,10 +163,21 @@ export class MapService {
     const dLat = this.radians(p2[0] - p1[0]);
     const dLong = this.radians(p2[1] - p1[1]);
     const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(this.radians(p1.lat())) * Math.cos(this.radians(p2.lat())) *
+      Math.cos(this.radians(p1[0])) * Math.cos(this.radians(p2[0])) *
       Math.sin(dLong / 2) * Math.sin(dLong / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return (R * c).toFixed(2);
+    return ((R * c) / 1000).toFixed(2);
+  }
+
+  drawLineBetweenTwoPoints(p1, p2) {
+    this.shortestLine = new google.maps.Polyline({
+      path: [new google.maps.LatLng(p1[0], p1[1]), new google.maps.LatLng(p2[0], p2[1])],
+      strokeColor: '#000000',
+      strokeOpacity: 1.0,
+      strokeWeight: 10,
+      geodesic: true,
+      map: this.map
+    });
   }
 
   sendNearestCryosphereData() {

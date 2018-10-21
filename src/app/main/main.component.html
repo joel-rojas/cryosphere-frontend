@@ -93,14 +93,14 @@
             <input ngbButton type="radio" value="rusia"> Rusia
           </label>
       </div>
-      <div class="btn-group btn-group-toggle fixed-layers-top" style="background: #DDDDDD;">
+      <div class="btn-group btn-group-toggle fixed-layers-top" style="background: #DDDDDD; border-radius: 5px; padding: 5px;">
         <!-- <label ngbButtonLabel class="btn btn-sm btn-primary">
           <input ngbButton type="radio" value="SMAP_L4_Snow_Mass"> Snow Mass
         </label>
         <label ngbButtonLabel class="btn btn-sm btn-primary">
           <input ngbButton type="radio" value="MODIS_Terra_NDSI_Snow_Cover"> Snow Cover
         </label> -->
-        <h5 [hidden]="distanceInMeters == null">Minimum distance in meters between user and frozen area: {{distanceInMeters}}</h5>
+        <h5 [hidden]="distanceInMeters == null">Minimum distance in km: {{distanceInMeters}}</h5>
         <!-- <label ngbButtonLabel class="btn btn-sm btn-primary">
           <input ngbButton type="radio" value="SMAP_L4_Frozen_Area"> Frozen Area
         </label> -->

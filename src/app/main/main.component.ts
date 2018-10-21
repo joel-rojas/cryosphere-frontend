@@ -65,6 +65,8 @@ export class MainComponent implements OnInit, OnChanges {
     this.mapService.getMapSubject().subscribe((mapObj) => {
       if (mapObj) {
         this.mapService.getMapOverlay().clear();
+        this.mapService.clearGeoCodingMarkers();
+        this.mapService.clearShortestPolylines();
         this.mapService.setImageLayerDataByYears();
         this.setSliderValuesByYear();
         // this.saveLayersForAPI().then((data) => {
