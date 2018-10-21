@@ -13,6 +13,26 @@
     <div class="col-md-4 bg-gray tabset-fixed">
 
       <ngb-tabset>
+        <ngb-tab title="Data">
+          <ng-template ngbTabContent>
+            <div class="card">
+              <ngx-charts-area-chart-stacked
+                [view]="view"
+                [scheme]="colorScheme"
+                [results]="multi"
+                [gradient]="gradient"
+                [xAxis]="showXAxis"
+                [yAxis]="showYAxis"
+                [legend]="showLegend"
+                [showXAxisLabel]="showXAxisLabel"
+                [showYAxisLabel]="showYAxisLabel"
+                [xAxisLabel]="xAxisLabel"
+                [yAxisLabel]="yAxisLabel"
+                (select)="onSelect($event)">
+              </ngx-charts-area-chart-stacked>
+            </div>
+          </ng-template>
+        </ngb-tab>
         <ngb-tab title="Filters">
           <ng-template ngbTabContent>
             <ngb-accordion class="h-50" #acc="ngbAccordion" activeIds="ngb-panel-0">

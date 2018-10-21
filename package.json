@@ -22,6 +22,7 @@
     "@angular/router": "^6.1.0",
     "@mdi/font": "^2.8.94",
     "@ng-bootstrap/ng-bootstrap": "^3.3.1",
+    "@swimlane/ngx-charts": "^9.0.0",
     "@types/googlemaps": "^3.30.15",
     "core-js": "^2.5.4",
     "ng5-slider": "^1.1.3",

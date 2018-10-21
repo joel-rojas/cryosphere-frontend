@@ -2,7 +2,7 @@ import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import {Observable, of, pipe} from 'rxjs';
 import {map, catchError} from 'rxjs/operators';
 import {MapService} from './map.service';
-const hampaturiData = require('../../assets/geodata/hampaturi.json');
+//const hampaturiData = require('../../assets/geodata/hampaturi.json');
 
 @Component({
   selector: 'app-map',
@@ -25,7 +25,7 @@ export class MapComponent implements OnInit {
     this.mapProm.then(() => {
       this.map = this.gmapService.getMap();
       this.gmapService.setImageLayer();
-      console.log(hampaturiData);
+    //  console.log(hampaturiData);
       // this.gmapService.setGeoJSONData(hampaturiData);
       // this.gmapService.getData().pipe(map((res) => res._body),
       //   catchError(error => Observable.of(null))).subscribe(data => {
