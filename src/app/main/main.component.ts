@@ -23,7 +23,7 @@ export class MainComponent implements OnInit, OnChanges {
     showTicks: true
   };
   optionTimer;
-  images = [1, 2, 3].map(() => `https://gibs.earthdata.nasa.gov/wmts/epsg4326/best/MODIS_Terra_CorrectedReflectance_TrueColor/default/2012-07-09/250m/6/13/${Math.floor((Math.random()*40)+1)}.jpg`);
+  images = [1, 2, 3].map(() => `https://gibs.earthdata.nasa.gov/wmts/epsg4326/best/MODIS_Terra_CorrectedReflectance_TrueColor/default/2018-07-09/250m/6/13/${Math.floor((Math.random()*40)+1)}.jpg`);
   single: any[];
   multi: any[] = [];
 

@@ -53,6 +53,7 @@
         <ngb-tab title="Images">
           <ng-template ngbTabContent>
             <div class="card">
+              <img width="100%" height="auto" src="https://www.nasa.gov/sites/default/files/thumbnails/image/seaicemin18_twitter_2_0.gif"/>
               <ngb-carousel *ngIf="images">
                 <ng-template ngbSlide>
                   <img [src]="images[0]" alt="Random first slide">
@@ -63,7 +64,17 @@
                 <ng-template ngbSlide>
                   <img [src]="images[2]" alt="Random third slide">
                 </ng-template>
+
               </ngb-carousel>
+            </div>
+          </ng-template>
+        </ngb-tab>
+        <ngb-tab title="About">
+          <ng-template ngbTabContent>
+            <div class="card p-5">
+              <p>This project was developed for the Cryoning Devs</p>
+              <p>Enjoy!</p>
+              <h1><i class="mdi mdi-linux"></i></h1>
             </div>
           </ng-template>
         </ngb-tab>
