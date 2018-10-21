@@ -5,9 +5,9 @@
       <ngb-tabset>
         <ngb-tab title="Data">
             <ng-template ngbTabContent>
-              <div class="card">
+              <div class="card p-3">
                 <label>Filter By Year</label>
-                <button class="btn-primary" (click)="onSetFilterByYear()">Generate</button>
+                <button class="btn-success mb-4" (click)="onSetFilterByYear()">Generate</button>
                 <div [hidden]="hideFilterByYearData">
                   <div class="mb-2">
                     <label>Years</label>
@@ -35,30 +35,29 @@
           </ngb-tab>
         <ngb-tab title="Filters">
           <ng-template ngbTabContent>
-            <ngb-accordion class="h-50" #acc="ngbAccordion" activeIds="ngb-panel-0">
-              <ngb-panel>
-                <ng-template ngbPanelTitle>
-                  <span>La Paz</span><span class="plus-minus"></span>
-                </ng-template>
-                <ng-template ngbPanelContent>
-                  <div class="mb-2">
-                    <label>Years</label>
-                    <ng5-slider [(value)]="value" [options]="options"></ng5-slider>
-                  </div>
-                  <div class="mb-2">
-                    <label>Years</label>
-                    <ng5-slider [(value)]="value" [options]="options"></ng5-slider>
-                  </div>
-                </ng-template>
-              </ngb-panel>
-              <ngb-panel>
-                <ng-template ngbPanelTitle>
-                  <span>Bolivia</span><span class="plus-minus"></span>
-                </ng-template>
-                <ng-template ngbPanelContent>
-                </ng-template>
-              </ngb-panel>
-            </ngb-accordion>
+            <div class="card p-3">
+                  <fieldset class="form-group">
+                    <h6>Calculation of nearest Cryosphere zone:</h6>
+                    <div class="form-check">
+                      <label class="form-check-label">
+                        <input class="form-check-input" type="checkbox" value="" checked="">
+                        Argentina
+                      </label>
+                    </div>
+                    <div class="form-check">
+                      <label class="form-check-label">
+                        <input class="form-check-input" type="checkbox" value="" checked="">
+                        Rusia
+                      </label>
+                    </div>
+                    <div class="form-check">
+                      <label class="form-check-label">
+                        <input class="form-check-input" type="checkbox" value="" checked="">
+                        Canada
+                      </label>
+                    </div>
+                  </fieldset>
+            </div>
           </ng-template>
         </ngb-tab>
         <ngb-tab title="Images">
