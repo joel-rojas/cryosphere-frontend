@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
-import { single, multi } from '../data';
+import { single, multi, hampaturi } from '../data';
 
 @Component({
   selector: 'app-dashboard',
@@ -11,8 +11,9 @@ import { single, multi } from '../data';
 export class DashboardComponent implements OnInit {
   single: any[];
   multi: any[];
+  hampaturi: any[];
 
-  view: any[] = [470, 340];
+  view: any[] = [550, 300];
 
   // options
   showXAxis = true;
@@ -30,7 +31,7 @@ export class DashboardComponent implements OnInit {
   // line, area
   autoScale = true;
 
-  constructor() { Object.assign(this, {single, multi});}
+  constructor() { Object.assign(this, {single, multi, hampaturi});}
 
   ngOnInit() {
   }
