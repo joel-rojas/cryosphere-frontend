@@ -1,4 +1,4 @@
-import { Component, OnInit, EventEmitter } from '@angular/core';
+import { Component, OnInit, EventEmitter, OnChanges, SimpleChanges } from '@angular/core';
 import { Options, LabelType, CustomStepDefinition, ChangeContext } from 'ng5-slider';
 import {map} from 'rxjs/operators';
 import { BrowserModule } from '@angular/platform-browser';
@@ -12,7 +12,8 @@ import { MapService } from './../map/map.service';
   templateUrl: './main.component.html',
   styleUrls: ['./main.component.css']
 })
-export class MainComponent implements OnInit {
+export class MainComponent implements OnInit, OnChanges {
+  countrySelected: 'argentina';
   dataLayerSelected = 'SMAP_L4_Frozen_Area';
   hideFilterByYearData = true;
   layersByYear = [];
@@ -48,14 +49,16 @@ export class MainComponent implements OnInit {
   // line, area
   autoScale = true;
 
-  constructor(private mapService: MapService, private webService: WebService) {
-    // Object.assign(this, {multi});
-  }
+  constructor(private mapService: MapService, private webService: WebService) {}
 
   onSelect(event) {
     console.log(event);
   }
   ngOnInit() {}
+
+  ngOnChanges(changes: SimpleChanges) {
+    this.mapService.getNearestCryosphreByUserLocation(this.countrySelected);
+  }
 
   onSetFilterByYear() {
     this.mapService.getMapSubject().subscribe((mapObj) => {

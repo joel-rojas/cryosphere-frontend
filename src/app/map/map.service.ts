@@ -8,6 +8,8 @@ const getScriptSrc = (callbackName) => {
   return `https://maps.googleapis.com/maps/api/js?key=AIzaSyDx92iaKUnowpTZOLt1FGAJqi98picikH8&libraries=places&callback=${callbackName}`;
 };
 
+window.mapT = null;
+
 @Injectable({
   providedIn: 'root'
 })
@@ -28,6 +30,26 @@ export class MapService {
       minDate: '2015/04/13'
     }
   };
+  private markers = [
+    // Canada
+    {
+      name: 'canada',
+      userCoor: [49.02147022636165, -106.33994195686506],
+      mapBBCoor: [[29.75101149258984, -129.133139588701], [56.93657550056194, -74.78789422737287]]
+    },
+    // Rusia
+    {
+      name: 'rusia',
+      userCoor: [67.9047751553543, 104.27632993158204],
+      mapBBCoor: [[59.66743389230126, 75.6823510497461], [73.61522579262414, 130.02759641107423]]
+    },
+    // Argentina
+    {
+      name: 'argentina',
+      userCoor: [-29.613533047982706, -68.58363456147652],
+      mapBBCoor: [[-37.71648323826961, -77.87085837739448], [-22.083171630144744, -50.69823569673042]]
+    }
+  ];
   private searchBox;
   private geoCodingMarkers = [];
   private yearSet = [];
@@ -56,7 +78,28 @@ export class MapService {
     return this.onReady().then(() => {
       this.map = new google.maps.Map(mapHtmlElement, options);
       this.mapSubject.next(this.map);
+      window.mapT = this.map;
       return this.map;
+    });
+  }
+
+  getNearestCryosphreByUserLocation(country) {
+    const countryData = this.markers.filter(val => val.name === country)[0];
+    const {mapBBCoor, userCoor, name} = countryData;
+    const data = {
+      boundingBox: mapBBCoor,
+      userLocation: userCoor,
+      image: { imageName: name}
+    };
+    this.clearGeoCodingMarkers();
+    const latLng = new google.maps.LatLng(userCoor[0], userCoor[1]);
+    this.geoCodingMarkers.push(new google.maps.Marker({
+      position: latLng,
+      map: this.map
+    }));
+    this.map.setCenter(latLng);
+    this.webService.sendCryosphereData(data).toPromise().then(response => {
+      console.log(response);
     });
   }
 
@@ -205,11 +248,11 @@ export class MapService {
         }
 
         // Create a marker for each place.
-        this.geoCodingMarkers.push(new google.maps.Marker({
-          map: this.map,
-          title: place.name,
-          position: place.geometry.location
-        }));
+        // this.geoCodingMarkers.push(new google.maps.Marker({
+        //   map: this.map,
+        //   title: place.name,
+        //   position: place.geometry.location
+        // }));
 
         if (place.geometry.viewport) {
           // Only geocodes have viewport.
@@ -279,18 +322,4 @@ export class MapService {
     });
     window.document.body.appendChild(script);
   }
-
-  /** Exemple of wrapped to promise API */
-  // geocode(address: string | google.maps.GeocoderRequest): Promise<google.maps.GeocoderResult[]> {
-    // return this.onReady().then(() => {
-    //   this.geocoder.geocode(typeof address == "google.maps.GeocoderRequest" ? address: {address: address},
-    //       (results: google.maps.GeocoderResult[], status: google.maps.GeocoderStatus) => {
-    //         if(status == google.maps.GeocoderStatus.OK) {
-    //           return results;
-    //         } else {
-    //           throw new Error(status.toString());
-    //         }
-    //   });
-    // });
-  // }
 }

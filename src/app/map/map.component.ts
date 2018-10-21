@@ -25,7 +25,7 @@ export class MapComponent implements OnInit {
     });
     this.mapProm.then(() => {
       this.map = this.gmapService.getMap();
-      this.gmapService.setMapClickEv();
+      // this.gmapService.setMapClickEv();
       this.gmapService.setImageLayer(this.dataLayerSelected);
     });
   }
