@@ -123,7 +123,8 @@ export class MapService {
   saveDataLayerForAPI() {
     this.layersByYear = [];
     return new Promise((resolve, reject) => {
-      this.getMapOverlay().getArray().forEach((val, idx, arr) => {
+      const overlays = this.getMapOverlay().getArray() as google.maps.ImageMapType[];
+      overlays.forEach((val, idx, arr) => {
         val.setOpacity(1);
         setTimeout(() => {
           html2canvas(document.getElementById('map')).then((canvas) => {
@@ -163,8 +164,8 @@ export class MapService {
     if (!isDateRange) {
       this.map.overlayMapTypes.clear();
     } else {
-      this.map.overlayMapTypes.getArray().
-        forEach((val: google.maps.MapType, idx) => {
+      const overlays = this.getMapOverlay().getArray() as google.maps.ImageMapType[];
+      overlays.forEach((val: google.maps.ImageMapType, idx) => {
         if (idx > 0) {
           val.setOpacity(0);
         } else {

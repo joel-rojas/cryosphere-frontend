@@ -73,7 +73,7 @@ export class MainComponent implements OnInit {
     });
   }
   onSliderChange(changeContext: ChangeContext): void {
-    const overlays = this.mapService.getMapOverlay().getArray();
+    const overlays = this.mapService.getMapOverlay().getArray() as google.maps.ImageMapType[];
     overlays.forEach((val, idx) => {
       if (this.years.indexOf(changeContext.value) === idx) {
         val.setOpacity(0.5);
@@ -89,7 +89,7 @@ export class MainComponent implements OnInit {
     this.webService.sendCryosphereDataByYear().toPromise().then((response) => {
       console.log('Processed successfully');
       console.log(response);
-      const data = JSON.parse(response._body).data;
+      const data = JSON.parse(response['_body']).data;
       console.log(data);
       this.multi = data;
       // console.log(data);
