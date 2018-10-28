@@ -1,176 +1,105 @@
 import { Injectable } from '@angular/core';
 import { Observable, of, BehaviorSubject } from 'rxjs';
-import html2canvas from 'html2canvas';
-
+import mapboxgl from 'mapbox-gl';
 import { WebService } from './../services/web.service';
 
-const getScriptSrc = (callbackName) => {
-  return `https://maps.googleapis.com/maps/api/js?key=AIzaSyDx92iaKUnowpTZOLt1FGAJqi98picikH8` +
-    `&libraries=places,geometry&callback=${callbackName}`;
+
+const getMapboxAPIKey = () => {
+  return 'pk.eyJ1Ijoiam9lbHJvamFzIiwiYSI6ImNqbnA4aWcxcDAwazYzcHFybXpidGc1cHUifQ.6cIq5oSTL9PvbHaInUG8Gg';
 };
 
 @Injectable({
   providedIn: 'root'
 })
 export class MapService {
+  private gibsBaseUrl = `https://gibs.earthdata.nasa.gov/wmts/`;
   private mapSubject: BehaviorSubject<any> = new BehaviorSubject(null);
-  private map: google.maps.Map;
-  private geocoder: google.maps.Geocoder;
-  private scriptLoadingPromise: Promise<any>;
-  private layerConf = {
-    'SMAP_L4_Snow_Mass': {
-      gMapsLevel: 'GoogleMapsCompatible_Level6'
-    },
-    'MODIS_Terra_NDSI_Snow_Cover': {
-      gMapsLevel: 'GoogleMapsCompatible_Level8'
-    },
-    'SMAP_L4_Frozen_Area': {
-      gMapsLevel: 'GoogleMapsCompatible_Level6',
-      minDate: '2015/04/13'
-    }
-  };
+  private map: mapboxgl.Map;
+  private gibsLayers = ['SMAP_L4_Frozen_Area'];
+  private layerConf = {};
   private shortestLine;
-  private markers = [
-    // Canada
-    {
-      name: 'canada',
-      userCoor: [49.02147022636165, -106.33994195686506],
-      mapBBCoor: [[29.75101149258984, -129.133139588701], [56.93657550056194, -74.78789422737287]]
-    },
-    // Rusia
-    {
-      name: 'rusia',
-      userCoor: [67.9047751553543, 104.27632993158204],
-      mapBBCoor: [[59.66743389230126, 75.6823510497461], [73.61522579262414, 130.02759641107423]]
-    },
-    // Argentina
-    {
-      name: 'argentina',
-      userCoor: [-29.613533047982706, -68.58363456147652],
-      mapBBCoor: [[-37.71648323826961, -77.87085837739448], [-22.083171630144744, -50.69823569673042]]
-    }
-  ];
-  private searchBox;
-  private geoCodingMarkers = [];
+  private userLocationMarkers: Array<mapboxgl.Marker> = [];
+  private frozenAreaLayersIdByYears: Array<any> = [];
   private yearSet = [];
   private layersByYear = [];
 
   constructor(private webService: WebService, private mapService: MapService) {
-    this.loadScriptLoadingPromise();
-    this.onReady().then(() => {
-      this.geocoder = new google.maps.Geocoder();
-    });
+    mapboxgl.accessToken = getMapboxAPIKey();
+    this.layerConf[this.gibsLayers[0]] = {
+      gMapsLevel: 'GoogleMapsCompatible_Level6',
+      minDate: '2015/04/13',
+      maxDate: '2018/10/07',
+      id: 'frozenArea'
+    };
+  }
+  // PUBLIC METHODS
+  addMapLayer(source, layer) {
+    const id = source.id;
+    delete source.id;
+    if (!this.map.getSource(id)) {
+      this.map.addSource(id, source);
+    }
+    this.map.addLayer(layer);
   }
 
-  onReady(): Promise<any> {
-    return this.scriptLoadingPromise;
+  addMarker(userCoordinates: Array<Array<Number>>) {
+    const marker = new mapboxgl.Marker()
+      .setLngLat(userCoordinates)
+      .addTo(this.map);
+    this.userLocationMarkers.push(marker);
   }
 
-  clearGeoCodingMarkers() {
-    // Clear out the old markers.
-    this.geoCodingMarkers.forEach((marker) => {
-      marker.setMap(null);
-    });
-    this.geoCodingMarkers = [];
+  centerMap(location: Array<Array<Number>>) {
+    this.map.setCenter(location);
   }
+
+  clearMapLayers() {
+    const layerKeySet = Object.keys(this.layerConf);
+    this.clearFrozenLayersByYears();
+    if (layerKeySet.length > 0) {
+      for (const key in this.layerConf) {
+        if (this.layerConf.hasOwnProperty(key) && this.map.getLayer(this.layerConf[key].id)) {
+          this.map.removeLayer(this.layerConf[key].id);
+        }
+      }
+    }
+  }
+
+  clearFrozenLayersByYears() {
+    const frozenAreaConf = this.getFrozenAreaLayerConf();
+    if (this.yearSet.length > 0) {
+      this.yearSet.forEach((val) => {
+        if (this.map.getLayer(`${frozenAreaConf.id}${val}`)) {
+          this.map.removeLayer(`${frozenAreaConf.id}${val}`);
+        }
+      });
+      this.frozenAreaLayersIdByYears = [];
+    }
+  }
+
   clearShortestPolylines() {
     if (this.shortestLine) {
       this.shortestLine.setMap(null);
     }
   }
 
-  initMap(mapHtmlElement: HTMLElement, options: google.maps.MapOptions): Promise<google.maps.Map> {
-    return this.onReady().then(() => {
-      this.map = new google.maps.Map(mapHtmlElement, options);
-      this.mapSubject.next(this.map);
-      return this.map;
+  clearUserLocationMarkers() {
+    // Clear out the old markers.
+    this.userLocationMarkers.forEach((marker) => {
+      marker.remove();
     });
+    this.userLocationMarkers = [];
   }
-
-  getNearestCryosphreByUserLocation(country) {
-    const countryData = this.markers.filter(val => val.name === country)[0];
-    const {mapBBCoor, userCoor, name} = countryData;
-    const data = {
-      boundingBox: mapBBCoor,
-      userLocation: userCoor,
-      image: { imageName: name}
-    };
-    this.clearGeoCodingMarkers();
-    this.clearShortestPolylines();
-    this.getMapOverlay().clear();
-    this.setImageLayer('SMAP_L4_Frozen_Area');
-    const latLng = new google.maps.LatLng(userCoor[0], userCoor[1]);
-    this.geoCodingMarkers.push(new google.maps.Marker({
-      position: latLng,
-      map: this.map
-    }));
-    this.map.setCenter(latLng);
-    return this.webService.sendCryosphereData(data).toPromise().then(response => {
-      const point = JSON.parse(response['_body']).data;
-      this.drawLineBetweenTwoPoints(userCoor, point);
-      return this.getDistanceTwoPoints(userCoor, point);
-    });
-  }
-
-  getCurrentDateStringFormat() {
-    const currentDate = new Date();
-    currentDate.setHours(0);
-    currentDate.setMinutes(0);
-    currentDate.setSeconds(0);
-    currentDate.setMilliseconds(0);
-    const monthVal = currentDate.getMonth() + 1;
-    const monthText = monthVal < 10 ? `0${monthVal}` : monthVal;
-    return currentDate.getFullYear() + '-' + monthText + '-' + '07';
-  }
-
-  getMapSubject(): Observable<any> {
-    return this.mapSubject.asObservable();
-  }
-
-  getMap() {
-    return this.map;
-  }
-
-  getMapBounds() {
-    return this.map.getBounds();
-  }
-
-  getMapOverlay() {
-    return this.map.overlayMapTypes;
-  }
-
-  getUserMarker() {
-    return this.geoCodingMarkers.length > 0 ? this.geoCodingMarkers[0] : null;
-  }
-
-  getTileUrl(layerConf, date): (tileCord: google.maps.Point, zoom: Number) => string {
-    const type = layerConf.name;
-    const gMapsLevel = layerConf.gMapsLevel;
-    return (tile, zoom) => {
-      return `//gibs.earthdata.nasa.gov/wmts/epsg3857/best/${type}/default/${date}` +
-        `/${gMapsLevel}/${zoom}/${tile.y}/${tile.x}.png`;
-    };
-  }
-
-  getYearSet() {
-    return this.yearSet;
-  }
-
-  private radians(x) {
-    return x * Math.PI / 180;
-  }
-
-  getDistanceTwoPoints(p1, p2) {
-    const R = 6378137; // Earth’s mean radius in meter
-    const dLat = this.radians(p2[0] - p1[0]);
-    const dLong = this.radians(p2[1] - p1[1]);
-    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(this.radians(p1[0])) * Math.cos(this.radians(p2[0])) *
-      Math.sin(dLong / 2) * Math.sin(dLong / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return ((R * c) / 1000).toFixed(2);
-  }
-
+  // drawLineBetweenTwoPoints(p1, p2) {
+  //   this.shortestLine = new google.maps.Polyline({
+  //     path: [new google.maps.LatLng(p1[0], p1[1]), new google.maps.LatLng(p2[0], p2[1])],
+  //     strokeColor: '#000000',
+  //     strokeOpacity: 1.0,
+  //     strokeWeight: 10,
+  //     geodesic: true,
+  //     map: this.map
+  //   });
+  // }
   drawLineBetweenTwoPoints(p1, p2) {
     this.shortestLine = new google.maps.Polyline({
       path: [new google.maps.LatLng(p1[0], p1[1]), new google.maps.LatLng(p2[0], p2[1])],
@@ -182,76 +111,198 @@ export class MapService {
     });
   }
 
-  sendNearestCryosphereData() {
-    const userLocation = this.getUserMarker();
-    const userCoor = [userLocation.position.lat(), userLocation.position.lng()];
-    const mapBBox = this.getMapBounds();
-    const mapBBoxNE = mapBBox.getNorthEast();
-    const mapBBoxSW = mapBBox.getSouthWest();
-    const mapBBCoor = [[mapBBoxSW.lat(), mapBBoxSW.lng()], [mapBBoxNE.lat(), mapBBoxNE.lng()]];
-    this.setImageLayer('SMAP_L4_Frozen_Area');
-    // this.saveDataLayerForAPI().then(data => {
-      // this.webService.sendCryosphereData(userCoor, mapBBCoor).toPromise().then((data) => {
-        // console.log(data);
-        // console.log('Processed Succesfully');
-      // });
-    // });
+  // getNearestCryosphreByUserLocation(country) {
+  //   const countryData = this.markers.filter(val => val.name === country)[0];
+  //   const {mapBBCoor, userCoor, name} = countryData;
+  //   const data = {
+  //     boundingBox: mapBBCoor,
+  //     userLocation: userCoor,
+  //     image: { imageName: name}
+  //   };
+  //   this.clearGeoCodingMarkers();
+  //   this.clearShortestPolylines();
+  //   this.getMapOverlay().clear();
+  //   this.setImageLayer(this.gibsLayers[0]);
+  //   const latLng = new google.maps.LatLng(userCoor[0], userCoor[1]);
+  //   this.geoCodingMarkers.push(new google.maps.Marker({
+  //     position: latLng,
+  //     map: this.map
+  //   }));
+  //   this.map.setCenter(latLng);
+  //   return this.webService.sendCryosphereData(data).toPromise().then(response => {
+  //     const point = JSON.parse(response['_body']).data;
+  //     this.drawLineBetweenTwoPoints(userCoor, point);
+  //     return this.getTwoPointsDistanceValue(userCoor, point);
+  //   });
+  // }
+  formatMonthDateValue(date: Date, isMonth: Boolean): String {
+    let dateVal;
+    if (isMonth) {
+      dateVal = date.getMonth() + 1;
+    } else {
+      dateVal = date.getDate();
+    }
+    return dateVal < 10 ? `0${dateVal}` : dateVal;
   }
 
-  saveDataLayerForAPI() {
+  getCustomGIBSImagesURLs() {
+    const MAX_PHOTOS = 40;
+    const projection = 'epsg4326';
+    const layerType = 'MODIS_Terra_CorrectedReflectance_TrueColor';
+    const date = '2018-10-07';
+    const randomValue = Math.floor((Math.random() * MAX_PHOTOS) + 1);
+    return `${this.gibsBaseUrl}${projection}/best/${layerType}/default/${date}/250m/6/13/${randomValue}.jpg`;
+  }
+
+  getFrozenAreaLayerConf() {
+    return this.layerConf[this.gibsLayers[0]];
+  }
+
+  getFrozenAreaLayersId() {
+    if (this.frozenAreaLayersIdByYears.length > 0) {
+      return this.frozenAreaLayersIdByYears;
+    }
+    const frozenAreaConf = this.getFrozenAreaLayerConf();
+    if (this.yearSet.length > 0) {
+      this.yearSet.forEach((val) => {
+        if (this.map.getLayer(`${frozenAreaConf.id}${val}`)) {
+          this.frozenAreaLayersIdByYears.push(`${frozenAreaConf.id}${val}`);
+        }
+      });
+      return this.frozenAreaLayersIdByYears;
+    }
+    return null;
+  }
+
+  getFrozenAreaLayerTxt() {
+    return this.gibsLayers[0];
+  }
+
+  getLatestLayerDateStringFormat() {
+    const frozenLayerConf = this.getFrozenAreaLayerConf();
+    const maxDate = frozenLayerConf.maxDate;
+    const formattedDate = maxDate.split('/').join('-');
+    const latestDate = new Date(`${formattedDate}T00:00:00`);
+    const monthText = this.formatMonthDateValue(latestDate, true);
+    const dateText = this.formatMonthDateValue(latestDate, false);
+    return latestDate.getFullYear() + '-' + monthText + '-' + dateText;
+  }
+
+  getLayerPaintProperty(layer, paintProp): any {
+    return this.map.getPaintProperty(layer, paintProp);
+  }
+
+  getMap() {
+    return this.map;
+  }
+
+  getMapBounds() {
+    return this.map.getBounds();
+  }
+
+  getMapSubject(): BehaviorSubject<any> {
+    return this.mapSubject;
+  }
+
+  getMapSubjectObs(): Observable<any> {
+    return this.getMapSubject().asObservable();
+  }
+
+  getUserMarker() {
+    return this.userLocationMarkers.length > 0 ? this.userLocationMarkers[0] : null;
+  }
+
+  getTileUrl(layerConf, date) {
+    const type = layerConf.name;
+    const gMapsLevel = layerConf.gMapsLevel;
+    return 'wmts/epsg3857/best/' +
+      `${type}/default/` +
+      `${date}/${gMapsLevel}/{z}/{y}/{x}.png`;
+  }
+
+  getTwoPointsDistanceValue(p1, p2) {
+    const R = 6378137; // Earth’s mean radius in meter
+    const dLat = this._radians(p2[0] - p1[0]);
+    const dLong = this._radians(p2[1] - p1[1]);
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(this._radians(p1[0])) * Math.cos(this._radians(p2[0])) *
+      Math.sin(dLong / 2) * Math.sin(dLong / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return ((R * c) / 1000).toFixed(2);
+  }
+
+  getYearSet() {
+    return this.yearSet;
+  }
+
+  initMap(id) {
+    this.map = new mapboxgl.Map({
+      container: id,
+      style: 'mapbox://styles/mapbox/streets-v9',
+      center: {lat: -16.5214, lng: -67.253},
+      zoom: 5,
+      maxZoom: 10,
+      preserveDrawingBuffer: true
+    });
+  }
+
+  saveDataLayerForAPI(isMultiple) {
     this.layersByYear = [];
     return new Promise((resolve, reject) => {
-      const overlays = this.getMapOverlay().getArray() as google.maps.ImageMapType[];
-      overlays.forEach((val, idx, arr) => {
-        val.setOpacity(1);
-        setTimeout(() => {
-          html2canvas(document.getElementById('map')).then((canvas) => {
+      const $layerChanged = this._getLayerPropertyChangedObservable(isMultiple);
+      $layerChanged.subscribe(obj => {
+        const {id} = obj;
+        this.onMapStyleLoadEv( () => {
+          const mapLayerOpacity = this.getLayerPaintProperty(obj.layer, 'raster-opacity');
+          if (mapLayerOpacity > 0) {
             const layerData =  {
-              imageName: idx,
-              encodedImage: canvas.toDataURL('image/png'),
-              dateImage: this.yearSet[idx]
+              imageName: id,
+              encodedImage: this.map.getCanvas().toDataURL('image/png'),
+              dateImage: this.yearSet[id]
             };
             this.layersByYear.push(layerData);
-            val.setOpacity(0);
-            if (idx === arr.length - 1) {
-              resolve(this.layersByYear);
+          }
+          this.setLayerPaintProperty(obj.layer, 'raster-opacity', 0);
+          if (id === this.layersByYear.length - 1) {
+            if (isMultiple) {
+              const frozenLayerConf = this.getFrozenAreaLayerConf();
+              const layerId = `${frozenLayerConf.id}${this.yearSet[0]}`;
+              this.setLayerPaintProperty(layerId, 'raster-opacity', 0.5);
             }
-          });
-        }, 3000);
+            resolve(this.layersByYear);
+          }
+        }, true);
+      }, (err) => {
+        reject(err);
       });
     });
   }
 
-  setImageLayer(dataLayer, dateString?, isDateRange?): void {
-    const layerInfo = {
-      name: dataLayer,
-      gMapsLevel: this.layerConf[dataLayer].gMapsLevel
-    };
-    dateString = dateString || this.getCurrentDateStringFormat();
-    const getTileUrl = this.getTileUrl(layerInfo, dateString);
-    const layerOptions = {
-      alt: dataLayer,
-      getTileUrl: getTileUrl,
-      maxZoom: 10,
-      minZoom: 1,
-      name: dataLayer,
-      tileSize: new google.maps.Size(256, 256),
-      opacity: 0.5
-    };
-    const imageMapType = new google.maps.ImageMapType(layerOptions);
-    if (!isDateRange) {
-      this.map.overlayMapTypes.clear();
-    } else {
-      const overlays = this.getMapOverlay().getArray() as google.maps.ImageMapType[];
-      overlays.forEach((val: google.maps.ImageMapType, idx) => {
-        if (idx > 0) {
-          val.setOpacity(0);
-        } else {
-          val.setOpacity(0.5);
-        }
+  sendNearestCryosphereData() {
+    const layerId = this.getFrozenAreaLayerConf().id;
+    const userLocation = this.getUserMarker().getLngLat();
+    const userCoor = [userLocation.lat, userLocation.lng];
+    const mapBBox = this.getMapBounds();
+    const mapBBoxSW = mapBBox.getSouthWest();
+    const mapBBoxNE = mapBBox.getNorthEast();
+    const mapBBCoor = [[mapBBoxSW.lat, mapBBoxSW.lng], [mapBBoxNE.lat, mapBBoxNE.lng]];
+    this.setImageLayer(this.gibsLayers[0]);
+    return this.saveDataLayerForAPI(false).then(data => {
+      const {imageName, encodedImage, dateImage} = data[0];
+      const bodyData = {
+        boundingBox: mapBBCoor,
+        userLocation: userCoor,
+        image: { imageName, encodedImage, dateImage}
+      };
+      this.setLayerPaintProperty(layerId, 'raster-opacity', 0.5);
+      this.centerMap([userCoor[1], userCoor[0]]);
+      return this.webService.sendCryosphereData(bodyData).toPromise().then((res) => {
+        console.log('Processed Succesfully');
+        const point = JSON.parse(res['_body']).data;
+        this.drawLineBetweenTwoPoints(userCoor, point);
+        return this.getTwoPointsDistanceValue(userCoor, point);
       });
-    }
-    this.map.overlayMapTypes.push(imageMapType);
+    });
   }
 
   setGeoJSONData(geoData): void {
@@ -262,99 +313,116 @@ export class MapService {
     this.map.data.setStyle(options);
   }
 
-  setGeocodingUIConf(inputEl): void {
-    this.searchBox = new google.maps.places.SearchBox(inputEl);
-    this.map.addListener('bounds_changed', () => {
-      this.searchBox.setBounds(this.map.getBounds());
-    });
-    this.searchBox.addListener('places_changed', () => {
-      const places = this.searchBox.getPlaces();
-      if (places.length === 0) {
-        return;
+  setImageLayer(dataLayer, dateString?, hasMultipleLayers?): void {
+    const layerInfo = {
+      name: dataLayer,
+      gMapsLevel: this.layerConf[dataLayer].gMapsLevel
+    };
+    dateString = dateString || this.getLatestLayerDateStringFormat();
+    const getTileUrl = this.getTileUrl(layerInfo, dateString);
+    const id = this.layerConf[dataLayer].id;
+    const sourceObj: any = {
+      id,
+      type: 'raster',
+      tiles: [
+        '//gibs-a.earthdata.nasa.gov/' + getTileUrl,
+        '//gibs-b.earthdata.nasa.gov/' + getTileUrl,
+        '//gibs-c.earthdata.nasa.gov/' + getTileUrl
+      ],
+      tileSize: 256
+    };
+    const layerObj: any = {
+      id,
+      type: 'raster',
+      source: sourceObj.id,
+      minzoom: 1,
+      maxzoom: 10,
+      paint: {
+        'raster-opacity': 0.5
       }
-      this.clearGeoCodingMarkers();
-
-      // For each place, get the icon, name and location.
-      const bounds = new google.maps.LatLngBounds();
-      places.forEach((place) => {
-        if (!place.geometry) {
-          console.log('Returned place contains no geometry');
-          return;
-        }
-
-        // Create a marker for each place.
-        // this.geoCodingMarkers.push(new google.maps.Marker({
-        //   map: this.map,
-        //   title: place.name,
-        //   position: place.geometry.location
-        // }));
-
-        if (place.geometry.viewport) {
-          // Only geocodes have viewport.
-          bounds.union(place.geometry.viewport);
-        } else {
-          bounds.extend(place.geometry.location);
-        }
-
-      });
-      this.map.fitBounds(bounds);
-      // this.sendNearestCryosphereData();
-    });
+    };
+    if (hasMultipleLayers) {
+      const yearStr = dateString.split('-')[0];
+      sourceObj.id = `${sourceObj.id}${yearStr}`;
+      layerObj.id = `${layerObj.id}${yearStr}`;
+      layerObj.source = sourceObj.id;
+      layerObj.paint['raster-opacity'] = 0;
+      if (this.yearSet[0] === parseInt(yearStr, 10)) {
+        layerObj.paint['raster-opacity'] = 0.5;
+      }
+    } else {
+      this.clearMapLayers();
+    }
+    this.addMapLayer(sourceObj, layerObj);
   }
 
   setImageLayerDataByYears() {
-    const layerName = 'SMAP_L4_Frozen_Area';
+    const layerName = this.gibsLayers[0];
     const minDateStr = this.layerConf[layerName].minDate;
-    const validDatStr = minDateStr.split('/').join('-');
-    const minDate = new Date(`${validDatStr}T00:00:00`);
-    const currentDate = new Date();
-    currentDate.setDate(7);
-    currentDate.setHours(0);
-    currentDate.setMinutes(0);
-    currentDate.setSeconds(0);
-    currentDate.setMilliseconds(0);
+    const maxDateStr = this.layerConf[layerName].maxDate.split('/').join('-');
+    const validDateStr = minDateStr.split('/').join('-');
+    const minDate = new Date(`${validDateStr}T00:00:00`);
+    // Latest layer date available from GIBS API
+    const latestDate = new Date(`${maxDateStr}T00:00:00`);
     this.yearSet = [];
-    while (minDate < currentDate) {
+    while (minDate < latestDate) {
       const year = minDate.getFullYear();
       this.yearSet.push(year);
-      if (year === currentDate.getFullYear()) {
-        minDate.setDate(currentDate.getDate());
-        minDate.setMonth(currentDate.getMonth());
+      if (year === latestDate.getFullYear()) {
+        minDate.setDate(latestDate.getDate());
+        minDate.setMonth(latestDate.getMonth());
       }
-      const monthVal = minDate.getMonth() + 1;
-      const monthText = monthVal < 10 ? `0${monthVal}` : monthVal;
-      const dateVal = minDate.getDate();
-      const dateTxt = dateVal < 10 ? `0${dateVal}` : dateVal;
+      const monthText = this.formatMonthDateValue(minDate, true);
+      const dateTxt = this.formatMonthDateValue(minDate, false);
       const dateStr = minDate.getFullYear() + '-' + monthText + '-' + dateTxt;
       this.setImageLayer(layerName, dateStr, true);
       minDate.setFullYear(year + 1);
     }
   }
 
-  setMapClickEv() {
-    this.map.addListener('click', (ev) => {
-      const latLng = ev.latLng;
-      this.clearGeoCodingMarkers();
-      this.geoCodingMarkers.push(new google.maps.Marker({
-        map: this.map,
-        position: latLng
-      }));
-      this.sendNearestCryosphereData();
+  setLayerPaintProperty(layer, paintProp, value): void {
+    this.map.setPaintProperty(layer, paintProp, value);
+  }
+
+  // EVENTS
+  onMapClickEv(callback: Function, isCalledOnce?: boolean) {
+    this.onMapUIEv('click', callback, isCalledOnce);
+  }
+
+  onMapLoadEv(callback: Function, isCalledOnce?: boolean) {
+    this.onMapUIEv('load', callback, isCalledOnce);
+  }
+
+  onMapStyleLoadEv(callback: Function, isCalledOnce?: boolean) {
+    this.onMapUIEv('styledata', callback, isCalledOnce);
+  }
+
+  onMapUIEv(event: String, callback: Function, isCalledOnce?: boolean): void {
+    const listenerFn = isCalledOnce ? 'once' : 'on';
+    this.map[listenerFn](event, (...args) => {
+      callback(...args);
     });
   }
 
-  private loadScriptLoadingPromise() {
-    const script = window.document.createElement('script');
-    script.type = 'text/javascript';
-    script.async = true;
-    script.defer = true;
-    const callbackName = 'initMap';
-    script.src = getScriptSrc(callbackName);
-    this.scriptLoadingPromise = new Promise<any>((resolve: Function, reject: Function) => {
-      (<any>window)[callbackName] = () => { resolve(); };
-
-      script.onerror = (error: Event) => { reject(error); };
+  // PRIVATE METHODS
+  private _getLayerPropertyChangedObservable(isMultiple): Observable<any> {
+    return Observable.create((observer) => {
+      const frozenLayerConf = this.getFrozenAreaLayerConf();
+      const layerId = frozenLayerConf.id;
+      if (isMultiple) {
+        this.yearSet.forEach((year, idx) => {
+          const layer = `${layerId}${year}`;
+          this.setLayerPaintProperty(layer, 'raster-opacity', 0.5);
+          observer.next({layer: `${layerId}${year}`, id: idx});
+        });
+      } else {
+        this.setLayerPaintProperty(layerId, 'raster-opacity', 0.5);
+        observer.next({layer: layerId, id: 0});
+      }
     });
-    window.document.body.appendChild(script);
+  }
+
+  private _radians(x) {
+    return x * Math.PI / 180;
   }
 }

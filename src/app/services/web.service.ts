@@ -5,7 +5,8 @@ import { Injectable } from '@angular/core';
   providedIn: 'root'
 })
 export class WebService {
-  baseUrl = 'http://172.26.40.87:8080/cryosphere/rest';
+  // baseUrl = 'http://localhost:8080/cryosphere/rest';
+  baseUrl = 'https://cryosphere.herokuapp.com/rest';
   constructor(private http: Http) { }
   sendCryosphereData(data) {
     const url = `${this.baseUrl}/maps/getNearestCryosphere`;
