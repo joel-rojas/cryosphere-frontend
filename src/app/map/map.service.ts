@@ -17,6 +17,7 @@ export class MapService {
   private map: mapboxgl.Map;
   private gibsLayers = ['SMAP_L4_Frozen_Area'];
   private layerConf = {};
+  private nearestLineLayerId = 'nearestCryosphere';
   private shortestLine;
   private userLocationMarkers: Array<mapboxgl.Marker> = [];
   private frozenAreaLayersIdByYears: Array<any> = [];
@@ -30,6 +31,10 @@ export class MapService {
       minDate: '2015/04/13',
       maxDate: '2018/10/07',
       id: 'frozenArea'
+    };
+    this.layerConf[this.nearestLineLayerId] = {
+      type: 'line',
+      id: 'nearest'
     };
   }
   // PUBLIC METHODS
@@ -51,6 +56,11 @@ export class MapService {
 
   centerMap(location: Array<Array<Number>>) {
     this.map.setCenter(location);
+  }
+
+  clearMapFeatures() {
+    this.clearMapLayers();
+    this.clearUserLocationMarkers();
   }
 
   clearMapLayers() {
@@ -90,51 +100,43 @@ export class MapService {
     });
     this.userLocationMarkers = [];
   }
-  // drawLineBetweenTwoPoints(p1, p2) {
-  //   this.shortestLine = new google.maps.Polyline({
-  //     path: [new google.maps.LatLng(p1[0], p1[1]), new google.maps.LatLng(p2[0], p2[1])],
-  //     strokeColor: '#000000',
-  //     strokeOpacity: 1.0,
-  //     strokeWeight: 10,
-  //     geodesic: true,
-  //     map: this.map
-  //   });
-  // }
+
   drawLineBetweenTwoPoints(p1, p2) {
-    this.shortestLine = new google.maps.Polyline({
-      path: [new google.maps.LatLng(p1[0], p1[1]), new google.maps.LatLng(p2[0], p2[1])],
-      strokeColor: '#000000',
-      strokeOpacity: 1.0,
-      strokeWeight: 10,
-      geodesic: true,
-      map: this.map
+    if (p2.length === 0) { p2 = [0, 0]; }
+    const lineLayerConf = this.layerConf[this.nearestLineLayerId];
+    const {id, type} = lineLayerConf;
+    if (this.map.getSource(id)) {
+      this.map.removeSource(id);
+    }
+    if (this.map.getLayer(id)) {
+      this.map.removeLayer(id);
+    }
+    this.map.addSource(id, {
+      type: 'geojson',
+      data: {
+          type: 'Feature',
+          properties: {},
+          geometry: {
+              type: 'LineString',
+              coordinates: [[p1[1], p1[0]], [p2[1], p2[0]]]
+          }
+      }
+    });
+    this.map.addLayer({
+      id,
+      type,
+      source: id,
+      layout: {
+          'line-join': 'round',
+          'line-cap': 'round'
+      },
+      paint: {
+          'line-color': '#444',
+          'line-width': 4
+      }
     });
   }
 
-  // getNearestCryosphreByUserLocation(country) {
-  //   const countryData = this.markers.filter(val => val.name === country)[0];
-  //   const {mapBBCoor, userCoor, name} = countryData;
-  //   const data = {
-  //     boundingBox: mapBBCoor,
-  //     userLocation: userCoor,
-  //     image: { imageName: name}
-  //   };
-  //   this.clearGeoCodingMarkers();
-  //   this.clearShortestPolylines();
-  //   this.getMapOverlay().clear();
-  //   this.setImageLayer(this.gibsLayers[0]);
-  //   const latLng = new google.maps.LatLng(userCoor[0], userCoor[1]);
-  //   this.geoCodingMarkers.push(new google.maps.Marker({
-  //     position: latLng,
-  //     map: this.map
-  //   }));
-  //   this.map.setCenter(latLng);
-  //   return this.webService.sendCryosphereData(data).toPromise().then(response => {
-  //     const point = JSON.parse(response['_body']).data;
-  //     this.drawLineBetweenTwoPoints(userCoor, point);
-  //     return this.getTwoPointsDistanceValue(userCoor, point);
-  //   });
-  // }
   formatMonthDateValue(date: Date, isMonth: Boolean): String {
     let dateVal;
     if (isMonth) {
@@ -221,6 +223,7 @@ export class MapService {
   }
 
   getTwoPointsDistanceValue(p1, p2) {
+    if (p2.length === 0) { p2 = [0, 0]; }
     const R = 6378137; // Earth’s mean radius in meter
     const dLat = this._radians(p2[0] - p1[0]);
     const dLong = this._radians(p2[1] - p1[1]);
@@ -253,16 +256,18 @@ export class MapService {
       $layerChanged.subscribe(obj => {
         const {id} = obj;
         this.onMapStyleLoadEv( () => {
-          const mapLayerOpacity = this.getLayerPaintProperty(obj.layer, 'raster-opacity');
-          if (mapLayerOpacity > 0) {
-            const layerData =  {
-              imageName: id,
-              encodedImage: this.map.getCanvas().toDataURL('image/png'),
-              dateImage: this.yearSet[id]
-            };
-            this.layersByYear.push(layerData);
+          if (this.map.getLayer(obj.layer)) {
+            const mapLayerOpacity = this.getLayerPaintProperty(obj.layer, 'raster-opacity');
+            if (mapLayerOpacity > 0) {
+              const layerData =  {
+                imageName: id,
+                encodedImage: this.map.getCanvas().toDataURL('image/png'),
+                dateImage: this.yearSet[id]
+              };
+              this.layersByYear.push(layerData);
+            }
+            this.setLayerPaintProperty(obj.layer, 'raster-opacity', 0);
           }
-          this.setLayerPaintProperty(obj.layer, 'raster-opacity', 0);
           if (id === this.layersByYear.length - 1) {
             if (isMultiple) {
               const frozenLayerConf = this.getFrozenAreaLayerConf();
@@ -295,10 +300,10 @@ export class MapService {
         image: { imageName, encodedImage, dateImage}
       };
       this.setLayerPaintProperty(layerId, 'raster-opacity', 0.5);
-      this.centerMap([userCoor[1], userCoor[0]]);
       return this.webService.sendCryosphereData(bodyData).toPromise().then((res) => {
-        console.log('Processed Succesfully');
-        const point = JSON.parse(res['_body']).data;
+        console.log('Processed Successfully');
+        const point = res.data;
+        this.centerMap([userCoor[1], userCoor[0]]);
         this.drawLineBetweenTwoPoints(userCoor, point);
         return this.getTwoPointsDistanceValue(userCoor, point);
       });

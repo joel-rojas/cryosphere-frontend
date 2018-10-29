@@ -1,6 +1,5 @@
 import { Component, OnInit, AfterViewInit } from '@angular/core';
 import { Options, ChangeContext } from 'ng5-slider';
-import mapboxgl from 'mapbox-gl';
 import { WebService } from './../services/web.service';
 import { MapService } from './../map/map.service';
 
@@ -49,8 +48,7 @@ export class MainComponent implements OnInit, AfterViewInit {
     this.mapService.onMapLoadEv(() => {
       this.mapService.onMapClickEv((ev) => {
         const lngLat = ev.lngLat;
-        this.mapService.clearFrozenLayersByYears();
-        this.mapService.clearUserLocationMarkers();
+        this.mapService.clearMapFeatures();
         this.mapService.addMarker([lngLat.lng, lngLat.lat]);
         this.mapService.sendNearestCryosphereData().then((distance) => {
           this.distanceInMeters = distance;
@@ -67,7 +65,7 @@ export class MainComponent implements OnInit, AfterViewInit {
   sendCryosphereDataByYear() {
     this.webService.sendCryosphereDataByYear().toPromise().then((response) => {
       console.log('Processed successfully');
-      const data = JSON.parse(response['_body']).data;
+      const data = response.data;
       this.multiChart = data;
     });
   }
@@ -90,9 +88,8 @@ export class MainComponent implements OnInit, AfterViewInit {
   onSetFilterByYear() {
     this.mapService.getMapSubjectObs().subscribe((mapObj) => {
       if (mapObj) {
-        this.mapService.clearMapLayers();
-        this.mapService.clearUserLocationMarkers();
-        // this.mapService.clearShortestPolylines();
+        this.distanceInMeters = null;
+        this.mapService.clearMapFeatures();
         this.mapService.setImageLayerDataByYears();
         this.setSliderValuesByYear();
         this.saveLayersForAPI().then((data) => {
