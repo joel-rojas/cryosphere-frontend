@@ -11038,7 +11038,7 @@ select.form-control[multiple] {
 }
 .fixed-layers-top{
   position: absolute;
-  top: 60px;
+  top: 10px;
   left: 10px;
   z-index: 10;
   background: #DDDDDD;
@@ -11129,4 +11129,26 @@ select.form-control[multiple] {
 .tabset-fixed .tab-content{
   height: 100%;
   overflow: auto;
+}
+/* LOADING MASK */
+.load-bg {
+  background: rgba(0, 0, 0, 0.5);
+  font-weight: 400;
+  height: 100%;
+  width: 100%;
+}
+
+.load {
+  width: 100px;
+  height: 100px;
+  /** height is required as absolute value **/
+  margin-left: auto;
+  margin-right: auto ;
+  margin-top: 25%;
+  position:relative;
+}
+
+.load span {
+  font-size: 1em;
+  color: #00D6BB;
 }
