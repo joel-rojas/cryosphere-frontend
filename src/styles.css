@@ -11041,6 +11041,9 @@ select.form-control[multiple] {
   top: 60px;
   left: 10px;
   z-index: 10;
+  background: #DDDDDD;
+  border-radius: 5px;
+  padding: 5px;
 }
 
 .plus-minus {

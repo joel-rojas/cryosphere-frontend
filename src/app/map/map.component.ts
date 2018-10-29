@@ -1,6 +1,6 @@
-import { Component, OnInit, ViewChild, ElementRef, Input, AfterViewInit, OnChanges, SimpleChanges } from '@angular/core';
-import {Observable, of, pipe} from 'rxjs';
-import {map, catchError} from 'rxjs/operators';
+import { BehaviorSubject } from 'rxjs';
+import { Component, OnInit, ViewChild, ElementRef, Input, AfterViewInit} from '@angular/core';
+import mapboxgl from 'mapbox-gl';
 import {MapService} from './map.service';
 
 @Component({
@@ -8,26 +8,22 @@ import {MapService} from './map.service';
   templateUrl: './map.component.html',
   styleUrls: ['./map.component.css']
 })
-export class MapComponent implements OnInit {
+export class MapComponent implements OnInit, AfterViewInit {
   @Input() dataLayerSelected;
-  @ViewChild('map') gmapElement: ElementRef;
-  map: google.maps.Map;
-  mapProm: Promise<any>;
+  @ViewChild('map') mapElement: ElementRef;
+  map: mapboxgl.Map;
 
-  constructor(private gmapService: MapService) { }
+  constructor(private mapService: MapService) { }
 
   ngOnInit() {
-    this.mapProm = this.gmapService.initMap(this.gmapElement.nativeElement, {
-      center: {lat: -16.5214, lng: -67.253},
-      scrollwheel: true,
-      zoom: 5,
-      maxZoom: 10
-    });
-    this.mapProm.then(() => {
-      this.map = this.gmapService.getMap();
-      // this.gmapService.setMapClickEv();
-      this.gmapService.setImageLayer(this.dataLayerSelected);
+    const mapEl = this.mapElement.nativeElement;
+    this.mapService.initMap(mapEl.id);
+  }
+  ngAfterViewInit() {
+    this.mapService.onMapLoadEv(() => {
+      this.map = this.mapService.getMap();
+      this.mapService.getMapSubject().next(this.map);
+      this.mapService.setImageLayer(this.dataLayerSelected);
     });
   }
-
 }
