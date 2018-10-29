@@ -102,14 +102,13 @@ export class MapService {
   }
 
   drawLineBetweenTwoPoints(p1, p2) {
-    if (p2.length === 0) { p2 = [0, 0]; }
     const lineLayerConf = this.layerConf[this.nearestLineLayerId];
     const {id, type} = lineLayerConf;
-    if (this.map.getSource(id)) {
-      this.map.removeSource(id);
-    }
     if (this.map.getLayer(id)) {
       this.map.removeLayer(id);
+    }
+    if (this.map.getSource(id)) {
+      this.map.removeSource(id);
     }
     this.map.addSource(id, {
       type: 'geojson',
@@ -223,7 +222,6 @@ export class MapService {
   }
 
   getTwoPointsDistanceValue(p1, p2) {
-    if (p2.length === 0) { p2 = [0, 0]; }
     const R = 6378137; // Earth’s mean radius in meter
     const dLat = this._radians(p2[0] - p1[0]);
     const dLong = this._radians(p2[1] - p1[1]);
@@ -303,6 +301,9 @@ export class MapService {
       return this.webService.sendCryosphereData(bodyData).toPromise().then((res) => {
         console.log('Processed Successfully');
         const point = res.data;
+        if (point.length === 0) {
+          return 'No nearest cryosphere found. Please zoom out the map.';
+        }
         this.centerMap([userCoor[1], userCoor[0]]);
         this.drawLineBetweenTwoPoints(userCoor, point);
         return this.getTwoPointsDistanceValue(userCoor, point);
