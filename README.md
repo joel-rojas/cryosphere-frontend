@@ -1,6 +1,18 @@
 # CryosphereFrontend
 
+This is the Find-My-Cryosphere challenge project (Web App) for the SpaceAppsChallenge 2018 contest.
+Made by the CryoningDevs team from location of La Paz city, Bolivia.
+
+A demo of this project is placed in the following [link](https://joel-rojas.github.io/cryosphere-frontend).
+
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 6.2.5.
+
+## Requirements
+
+In order to get this project up and running locally you will have to perform the following:
+- Install NodeJS >= 8.11.x && npm >= 6.4.x
+- Install Angular-CLI globally => `npm install -g @angular/cli@6.2.5`
+- Within this cloned repo install its npm dependencies from terminal=> `user:{pathClonedRepo}$: npm install` where `pathClonedRepo` is the cloned repo directory 
 
 ## Development server
 
